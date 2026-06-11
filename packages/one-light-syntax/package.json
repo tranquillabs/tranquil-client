@@ -1,0 +1,15 @@
+{
+  "name": "one-light-syntax",
+  "theme": "syntax",
+  "version": "1.8.4",
+  "description": "One light syntax theme developed for Atom, repurposed for Pulsar",
+  "keywords": [
+    "light",
+    "syntax"
+  ],
+  "repository": "https://github.com/pulsar-edit/pulsar",
+  "license": "MIT",
+  "engines": {
+    "atom": ">0.40.0"
+  }
+}

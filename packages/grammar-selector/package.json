@@ -1,0 +1,34 @@
+{
+  "name": "grammar-selector",
+  "version": "0.50.1",
+  "main": "./lib/main",
+  "description": "Select the grammar to use for the current editor with `ctrl-shift-L`.",
+  "license": "MIT",
+  "repository": "https://github.com/pulsar-edit/pulsar",
+  "engines": {
+    "atom": "*"
+  },
+  "dependencies": {
+    "atom-select-list": "^0.7.0"
+  },
+  "consumedServices": {
+    "status-bar": {
+      "versions": {
+        "^1.0.0": "consumeStatusBar"
+      }
+    }
+  },
+  "configSchema": {
+    "showOnRightSideOfStatusBar": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show the active pane item’s language on the right side of Pulsar’s status bar, instead of the left."
+    },
+    "hideDuplicateTextMateGrammars": {
+      "type": "boolean",
+      "default": true,
+      "title": "Hide Duplicate Grammars",
+      "description": "Hides non-preferred grammars when there is more than one grammar. When checked, whichever grammar is preferred for a given scope name (TextMate or Tree-sitter) will be the only one shown. When unchecked, all grammars will always be shown in the list, regardless of the user’s settings."
+    }
+  }
+}

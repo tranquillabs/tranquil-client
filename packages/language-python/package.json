@@ -1,0 +1,30 @@
+{
+  "name": "language-python",
+  "main": "lib/main",
+  "version": "0.53.6",
+  "engines": {
+    "atom": "*",
+    "node": ">=12"
+  },
+  "description": "Python language support in Atom",
+  "keywords": [
+    "tree-sitter"
+  ],
+  "repository": "https://github.com/pulsar-edit/pulsar",
+  "license": "MIT",
+  "atomTestRunner": "runners/jasmine2-test-runner",
+  "dependencies": {
+  },
+  "consumedServices": {
+    "hyperlink.injection": {
+      "versions": {
+        "0.1.0": "consumeHyperlinkInjection"
+      }
+    },
+    "todo.injection": {
+      "versions": {
+        "0.1.0": "consumeTodoInjection"
+      }
+    }
+  }
+}

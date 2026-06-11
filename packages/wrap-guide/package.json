@@ -1,0 +1,49 @@
+{
+  "name": "wrap-guide",
+  "version": "0.41.1",
+  "main": "./lib/main",
+  "description": "Displays a vertical line at the 80th character in the editor.\nThis packages uses the config value of `editor.preferredLineLength` when set.",
+  "license": "MIT",
+  "repository": "https://github.com/pulsar-edit/pulsar",
+  "engines": {
+    "atom": "*"
+  },
+  "configSchema": {
+    "columns": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "Display guides at each of the listed character widths. Leave blank for one guide at your `editor.preferredLineLength`."
+    },
+    "modifyPreferredLineLength": {
+      "default": true,
+      "type": "boolean",
+      "description": "Modify the Editor's Preferred Line Length when changing Wrap Guide's Columns setting."
+    },
+    "enabled": {
+      "default": true,
+      "type": "boolean"
+    },
+    "showWrapGuide": {
+      "type": "string",
+      "description": "Choose when to show the wrap guide.",
+      "enum": [
+        {
+          "value": "always",
+          "description": "Always"
+        },
+        {
+          "value": "wrapping",
+          "description": "When soft wrap is enabled"
+        },
+        {
+          "value": "atPreferredLineLength",
+          "description": "When soft wrap at preferred line length is enabled"
+        }
+      ],
+      "default": "always"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "link",
+  "version": "0.31.6",
+  "main": "./lib/link",
+  "description": "Opens http(s) links under the cursor",
+  "license": "MIT",
+  "repository": "https://github.com/pulsar-edit/pulsar",
+  "engines": {
+    "atom": "*"
+  },
+  "activationCommands": {
+    "atom-workspace": [
+      "link:open"
+    ]
+  },
+  "dependencies": {
+    "underscore-plus": "^1.7.0"
+  }
+}

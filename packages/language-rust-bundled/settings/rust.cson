@@ -1,0 +1,27 @@
+'.source.rust':
+  'editor':
+    'commentStart': '// '
+    'commentDelimiters':
+      'line': '//'
+      'block': ['/*', '*/']
+    'increaseIndentPattern': '(?x)
+       ^ .* \\{ [^}"\']* $
+      |^ .* \\( [^\\)"\']* $
+      |^ \\s* \\{ \\} $
+      '
+    'decreaseIndentPattern': '(?x)
+       ^ \\s* (\\s* /[*] .* [*]/ \\s*)* \\}
+      |^ \\s* (\\s* /[*] .* [*]/ \\s*)* \\)
+      '
+    'tabLength': 4
+    'softTabs': true
+    'preferredLineLength': 99
+  'bracket-matcher':
+    autocompleteCharacters: [
+      '()'
+      '[]'
+      '{}'
+      '<>'
+      '""'
+      '``'
+    ]

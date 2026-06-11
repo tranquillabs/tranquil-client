@@ -1,0 +1,11 @@
+{
+  "name": "language-sql",
+  "version": "0.25.10",
+  "description": "SQL language support in Atom",
+  "engines": {
+    "atom": "*",
+    "node": "*"
+  },
+  "repository": "https://github.com/pulsar-edit/pulsar",
+  "license": "MIT"
+}

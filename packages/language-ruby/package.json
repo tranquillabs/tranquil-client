@@ -1,0 +1,30 @@
+{
+  "name": "language-ruby",
+  "version": "0.73.0",
+  "description": "Ruby language support in Atom",
+  "keywords": [
+    "tree-sitter"
+  ],
+  "engines": {
+    "atom": "*",
+    "node": ">=12"
+  },
+  "main": "lib/main",
+  "license": "MIT",
+  "repository": "https://github.com/pulsar-edit/pulsar",
+  "devDependencies": {
+    "dedent": "^0.7.0"
+  },
+  "consumedServices": {
+    "hyperlink.injection": {
+      "versions": {
+        "0.1.0": "consumeHyperlinkInjection"
+      }
+    },
+    "todo.injection": {
+      "versions": {
+        "0.1.0": "consumeTodoInjection"
+      }
+    }
+  }
+}

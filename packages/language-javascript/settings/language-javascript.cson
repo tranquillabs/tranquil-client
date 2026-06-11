@@ -1,0 +1,30 @@
+'.source.js':
+  'editor':
+    'nonWordCharacters': '/\\()"\':,.;<>~!#@%^&*|+=[]{}`?-…'
+    'commentStart': '// '
+    'commentDelimiters':
+      'block': ['/*', '*/']
+      'line': '//'
+    'foldEndPattern': '^\\s*\\}|^\\s*\\]|^\\s*\\)'
+    'increaseIndentPattern': '(?x)
+        \\{ [^}"\']*(//.*)? $
+      | \\[ [^\\]"\']*(//.*)? $
+      | \\( [^)"\']*(//.*)? $
+      '
+    'decreaseIndentPattern': '(?x)
+        ^ \\s* (\\s* /[*] .* [*]/ \\s*)* [}\\])]
+      '
+
+'.source.js .meta.block.jsx.js':
+  'editor':
+    'commentStart': '{/*'
+    'commentEnd': '*/}'
+    'commentDelimiters':
+      'block': ['{/*', '*/}']
+
+'.source.js .meta.jsx.inside-tag.js':
+  'editor':
+    'commentStart': '{/*'
+    'commentEnd': '*/}'
+    'commentDelimiters':
+      'block': ['{/*', '*/}']

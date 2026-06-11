@@ -1,0 +1,29 @@
+{
+  "name": "language-rust-bundled",
+  "version": "0.1.1",
+  "description": "Rust support for Pulsar",
+  "keywords": [
+    "language",
+    "grammar",
+    "rust"
+  ],
+  "main": "lib/main.js",
+  "repository": "https://github.com/pulsar-edit/pulsar",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0",
+    "node": ">=12"
+  },
+  "consumedServices": {
+    "hyperlink.injection": {
+      "versions": {
+        "0.1.0": "consumeHyperlinkInjection"
+      }
+    },
+    "todo.injection": {
+      "versions": {
+        "0.1.0": "consumeTodoInjection"
+      }
+    }
+  }
+}

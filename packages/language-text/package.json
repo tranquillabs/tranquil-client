@@ -1,0 +1,11 @@
+{
+  "name": "language-text",
+  "version": "0.7.4",
+  "description": "Plain text support in Atom",
+  "engines": {
+    "atom": "*",
+    "node": "*"
+  },
+  "repository": "https://github.com/pulsar-edit/pulsar",
+  "license": "MIT"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "language-mustache",
+  "version": "0.14.5",
+  "description": "Mustache language support in Atom",
+  "license": "MIT",
+  "engines": {
+    "atom": "*",
+    "node": "*"
+  },
+  "repository": "https://github.com/pulsar-edit/pulsar"
+}

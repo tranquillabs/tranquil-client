@@ -1,0 +1,27 @@
+{
+  "version": "0.60.20",
+  "name": "language-c",
+  "description": "Atom language support for C/C++",
+  "keywords": [
+    "tree-sitter"
+  ],
+  "main": "lib/main",
+  "repository": "https://github.com/pulsar-edit/pulsar",
+  "license": "MIT",
+  "engines": {
+    "atom": "*",
+    "node": ">=12"
+  },
+  "consumedServices": {
+    "hyperlink.injection": {
+      "versions": {
+        "0.1.0": "consumeHyperlinkInjection"
+      }
+    },
+    "todo.injection": {
+      "versions": {
+        "0.1.0": "consumeTodoInjection"
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "language-css",
+  "description": "CSS support in Atom",
+  "keywords": [
+    "tree-sitter"
+  ],
+  "version": "0.45.4",
+  "engines": {
+    "atom": "*",
+    "node": ">=14"
+  },
+  "main": "lib/main",
+  "repository": "https://github.com/pulsar-edit/pulsar",
+  "license": "MIT",
+  "consumedServices": {
+    "hyperlink.injection": {
+      "versions": {
+        "0.1.0": "consumeHyperlinkInjection"
+      }
+    },
+    "todo.injection": {
+      "versions": {
+        "0.1.0": "consumeTodoInjection"
+      }
+    }
+  }
+}

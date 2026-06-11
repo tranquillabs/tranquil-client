@@ -1,0 +1,7 @@
+'menu': [
+  'label': 'Help'
+  'submenu': [
+    {'label': 'Welcome Guide', 'command': 'welcome:show'}
+    {'label': 'Change Log', 'command': 'welcome:showchangelog'}
+  ]
+]

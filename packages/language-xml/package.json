@@ -1,0 +1,11 @@
+{
+  "name": "language-xml",
+  "version": "0.35.3",
+  "description": "XML language support in Atom",
+  "engines": {
+    "atom": "*",
+    "node": "*"
+  },
+  "repository": "https://github.com/pulsar-edit/pulsar",
+  "license": "MIT"
+}
