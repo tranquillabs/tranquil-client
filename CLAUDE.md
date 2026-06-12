@@ -8,6 +8,11 @@ Always run `source ~/.nvm/nvm.sh && nvm use` before running any `node`, `yarn`, 
 
 Never add Claude as a co-author on commits. Do not include `Co-Authored-By: Claude` or any similar AI attribution in commit messages.
 
+## Branch Strategy
+
+- `tranquil/main` — the active development branch. All work goes here.
+- `master` — tracks `upstream/master` (Pulsar). Do not commit or merge directly to `master`. Changes reach `master` only via an intentional `git merge --allow-unrelated-histories tranquil/main` when ready to integrate upstream.
+
 ## Reference Docs
 
 - [Pulsar documentation](https://docs.pulsar-edit.dev/)
