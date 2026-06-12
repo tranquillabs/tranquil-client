@@ -80,13 +80,13 @@ async function main() {
   const electronBin = require('electron');
   const electronProcess = spawn(
     electronBin,
-    ['--no-sandbox', '--enable-logging', '--preserve-symlinks', '.', '-f'],
+    ['--no-sandbox', '--enable-logging', '.', '-f'],
     {
       cwd: path.join(__dirname, '..'),
       stdio: 'inherit',
       env: {
         ...process.env,
-        NODE_OPTIONS: '--preserve-symlinks',
+        NODE_PATH: path.join(__dirname, '..', 'node_modules'),
         PMS_ACCOUNTS_PORT: String(port),
         APM_PATH: path.join(__dirname, 'stub-ppm.js'),
       },
