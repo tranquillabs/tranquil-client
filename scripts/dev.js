@@ -88,7 +88,6 @@ async function main() {
         ...process.env,
         NODE_PATH: path.join(__dirname, '..', 'node_modules'),
         PMS_ACCOUNTS_PORT: String(port),
-        APM_PATH: path.join(__dirname, 'stub-ppm.js'),
       },
     }
   );

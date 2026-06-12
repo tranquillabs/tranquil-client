@@ -8,6 +8,12 @@ Always run `source ~/.nvm/nvm.sh && nvm use` before running any `node`, `yarn`, 
 
 Never add Claude as a co-author on commits. Do not include `Co-Authored-By: Claude` or any similar AI attribution in commit messages.
 
+## Reference Docs
+
+- [Pulsar documentation](https://docs.pulsar-edit.dev/)
+
+When solving a problem, check how Pulsar handles it first. Prefer the upstream approach over inventing something new. The Pulsar repo is at `/Users/david/Documents/Tranquil/Repos/pulsar`.
+
 ## Project Overview
 
 Tranquil is an Electron-based desktop app forked from Pulsar (which is itself a fork of Atom). Most of `packages/` and `src/` is upstream Pulsar code. A small set of packages are Tranquil-owned and actively developed.
@@ -56,6 +62,8 @@ git clone https://github.com/tranquillabs/tranquil-theme-light.git
 cd tranquil-client
 source ~/.nvm/nvm.sh && nvm use
 yarn install
+git submodule update --init ppm
+cd ppm && yarn install && cd ..
 ```
 
 ## Dev Startup
@@ -64,7 +72,7 @@ yarn install
 1. Finds a free port
 2. Starts pms-accounts (Vite/SvelteKit) via `node <pms-accounts>/node_modules/vite/bin/vite.js`
 3. Polls until pms-accounts is ready
-4. Spawns Electron with `PMS_ACCOUNTS_PORT` and `APM_PATH` set
+4. Spawns Electron with `PMS_ACCOUNTS_PORT` set
 
 pms-accounts path is configured via `.env` (see `.env-example`). Node version is managed by `.nvmrc` — always run `nvm use` before `yarn` commands.
 
@@ -78,6 +86,13 @@ pms-accounts path is configured via `.env` (see `.env-example`). Node version is
 
 If an IPC handler or feature silently does nothing, check for missing `require()`s at the top of the file — a MODULE_NOT_FOUND error at module load time crashes the entire file without any obvious error. Check that all dependencies in `cz-init.js` and other main-process files are actually installed.
 
-## ppm Stub
+## ppm
 
-`ppm/bin/ppm` is a stub script (not a real package manager). It returns `[]` for `outdated` and `list` commands so `settings-view` doesn't error on startup. Tranquil does not use ppm for package management.
+`ppm` is a git submodule (`pulsar-edit/ppm`). After cloning, initialize and build it once:
+
+```sh
+git submodule update --init ppm
+cd ppm && yarn install
+```
+
+This populates `ppm/bin/ppm`, which `settings-view` uses to list installed packages. Tranquil does not use ppm to install or manage packages.
