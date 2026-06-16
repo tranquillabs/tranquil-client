@@ -164,6 +164,7 @@
 
 'atom-workspace atom-text-editor:not([mini])':
   # Pulsar specific
+  'alt-z': 'editor:toggle-soft-wrap'
   'alt-cmd-z': 'editor:checkout-head-revision'
   'cmd-<': 'editor:scroll-to-cursor'
   'alt-cmd-ctrl-f': 'editor:fold-selection'

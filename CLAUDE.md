@@ -17,7 +17,13 @@ Never add Claude as a co-author on commits. Do not include `Co-Authored-By: Clau
 
 - [Pulsar documentation](https://docs.pulsar-edit.dev/)
 
-When solving a problem, check how Pulsar handles it first. Prefer the upstream approach over inventing something new. The Pulsar repo is at `/Users/david/Documents/Tranquil/Repos/pulsar`.
+When solving a problem, check how Pulsar handles it first. Prefer the upstream approach over inventing something new.
+
+**Always read Pulsar core source from `tranquil-client` itself** (e.g. `src/workspace.js`, `src/pane.js`), not from the separate Pulsar repo at `/Users/david/Documents/Tranquil/Repos/pulsar`. Tranquil-client is the fork — it contains the actual running code. The upstream Pulsar repo is only useful as a reference for _approach_, not as a source of truth for what code is executing.
+
+## Config Directory
+
+Tranquil uses `~/.tranquil` as its config/data directory, not `~/.pulsar`. Any reference to Pulsar's config dir (e.g. `~/.pulsar/dev/packages/`, `~/.pulsar/packages/`) should use `~/.tranquil` instead.
 
 ## Project Overview
 
@@ -70,6 +76,19 @@ yarn install
 git submodule update --init ppm
 cd ppm && yarn install && cd ..
 ```
+
+Then symlink the owned packages into `~/.tranquil/dev/packages/` so they load as dev packages (not core) in local development:
+
+```sh
+mkdir -p ~/.tranquil/dev/packages
+ln -s /Users/david/Documents/Tranquil/Repos/tranquil-automations ~/.tranquil/dev/packages/tranquil-automations
+ln -s /Users/david/Documents/Tranquil/Repos/tranquil-browser ~/.tranquil/dev/packages/tranquil-browser
+ln -s /Users/david/Documents/Tranquil/Repos/tranquil-config ~/.tranquil/dev/packages/tranquil-config
+ln -s /Users/david/Documents/Tranquil/Repos/tranquil-theme-dark ~/.tranquil/dev/packages/tranquil-theme-dark
+ln -s /Users/david/Documents/Tranquil/Repos/tranquil-theme-light ~/.tranquil/dev/packages/tranquil-theme-light
+```
+
+This is the idiomatic Pulsar approach: packages found in `dev/packages/` are discovered before `packageDependencies` and get `isBundled: false`, so they appear as dev packages rather than core. In production builds the symlinks won't exist and the packages load from `node_modules` as bundled.
 
 ## Dev Startup
 

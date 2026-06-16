@@ -186,7 +186,7 @@ ipcMain.on('add-link-to-treeview', (event, arg) => {
 ipcMain.on('webview-key-events', (event, arg) => {
   BrowserWindow.getFocusedWindow()?.webContents?.send(
     'webview-key-events',
-    arg
+    { ...arg, webContentsId: event.sender.id }
   );
 });
 
