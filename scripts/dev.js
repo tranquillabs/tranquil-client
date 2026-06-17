@@ -88,6 +88,7 @@ async function main() {
         ...process.env,
         NODE_PATH: path.join(__dirname, '..', 'node_modules'),
         PMS_ACCOUNTS_PORT: String(port),
+        ATOM_RESOURCE_PATH: path.join(__dirname, '..'),
       },
     }
   );

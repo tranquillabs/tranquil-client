@@ -194,9 +194,72 @@
     "yaml-front-matter": "^4.1.1",
     "yargs": "17.6.2"
   },
+  "_atomPackages": {
+    "tranquil-automations": {
+      "metadata": {
+        "name": "tranquil-automations",
+        "main": "./lib/apm-automations",
+        "version": "0.0.0",
+        "description": "Write and run JavaScript automations against any web app",
+        "repository": "https://github.com/tranquillabs/tranquil-automations",
+        "author": { "name": "Tranquil Labs", "url": "https://github.com/tranquillabs" },
+        "license": "MIT",
+        "engines": { "atom": ">=1.0.0 <2.0.0" }
+      }
+    },
+    "tranquil-browser": {
+      "metadata": {
+        "name": "tranquil-browser",
+        "main": "./lib/tranquil-browser",
+        "version": "0.0.99",
+        "description": "Chromium browser with devtools, zoom, history, and direct .url file support from the Project Pane",
+        "repository": "https://github.com/tranquillabs/tranquil-browser",
+        "author": { "name": "Tranquil Labs", "url": "https://github.com/tranquillabs" },
+        "license": "MIT",
+        "engines": { "atom": ">=0.174.0 <2.0.0" }
+      }
+    },
+    "tranquil-config": {
+      "metadata": {
+        "name": "tranquil-config",
+        "main": "./src/index",
+        "version": "1.0.0",
+        "description": "Manage configuration and settings",
+        "repository": "https://github.com/tranquillabs/tranquil-client",
+        "author": { "name": "Tranquil Labs", "url": "https://github.com/tranquillabs" },
+        "license": "MIT",
+        "engines": { "atom": "*" }
+      }
+    },
+    "tranquil-theme-dark": {
+      "metadata": {
+        "name": "tranquil-theme-dark",
+        "version": "1.2.1",
+        "description": "Tranquil dark UI theme",
+        "repository": "https://github.com/tranquillabs/tranquil-theme-dark",
+        "author": { "name": "Tranquil Labs", "url": "https://github.com/tranquillabs" },
+        "license": "MIT",
+        "theme": "ui",
+        "engines": { "atom": ">0.40.0" }
+      }
+    },
+    "tranquil-theme-light": {
+      "metadata": {
+        "name": "tranquil-theme-light",
+        "version": "1.2.1",
+        "description": "Tranquil light UI theme",
+        "repository": "https://github.com/tranquillabs/tranquil-theme-light",
+        "author": { "name": "Tranquil Labs", "url": "https://github.com/tranquillabs" },
+        "license": "MIT",
+        "theme": "ui",
+        "engines": { "atom": ">0.40.0" }
+      }
+    }
+  },
   "packageDependencies": {
     "tranquil-automations": "link:../tranquil-automations",
     "tranquil-browser": "link:../tranquil-browser",
+    "tranquil-config": "link:../tranquil-config",
     "tranquil-theme-dark": "link:../tranquil-theme-dark",
     "tranquil-theme-light": "link:../tranquil-theme-light",
     "atom-dark-syntax": "file:./packages/atom-dark-syntax",

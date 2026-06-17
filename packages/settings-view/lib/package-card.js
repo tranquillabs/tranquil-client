@@ -6,6 +6,7 @@ import {shell} from 'electron'
 import etch from 'etch'
 import BadgeView from './badge-view'
 import path from 'path'
+import fs from 'fs'
 
 import {ownerFromRepository, repoUrlFromRepository} from './utils'
 
@@ -69,7 +70,7 @@ export default class PackageCard {
 
   render () {
     const displayName = (this.pack.gitUrlInfo ? this.pack.gitUrlInfo.project : this.pack.name) || ''
-    const owner = ownerFromRepository(this.pack.repository)
+    const owner = (this.pack.author?.name) || ownerFromRepository(this.pack.repository)
     const description = this.pack.description || ''
 
     return (
@@ -133,6 +134,7 @@ export default class PackageCard {
     this.packageManager.loadCompatiblePackageVersion(this.pack.name, (err, pack) => {
       if (err != null) {
         console.error(err)
+        return
       }
 
       const packageVersion = pack.version
@@ -240,7 +242,7 @@ export default class PackageCard {
 
     const packageAuthorClickHandler = (event) => {
       event.stopPropagation()
-      shell.openExternal(`https://web.pulsar-edit.dev/users/${ownerFromRepository(this.pack.repository)}`) //TODO: Fix - This does not current exist but this will at least be more accurate
+      shell.openExternal(this.pack.author?.url || `https://web.pulsar-edit.dev/users/${ownerFromRepository(this.pack.repository)}`)
     }
     this.refs.loginLink.addEventListener('click', packageAuthorClickHandler)
     this.disposables.add(new Disposable(() => { this.refs.loginLink.removeEventListener('click', packageAuthorClickHandler) }))
@@ -279,7 +281,11 @@ export default class PackageCard {
   }
 
   loadCachedMetadata () {
-    if (repoUrlFromRepository(this.pack.repository) === atom.branding.urlCoreRepo) {
+    const localPkg = atom.packages.getLoadedPackage(this.pack.name);
+    const localLogoPath = localPkg ? path.join(localPkg.path, 'resources', 'logo.png') : null;
+    if (localLogoPath && fs.existsSync(localLogoPath)) {
+      this.refs.avatar.src = `file://${localLogoPath}`;
+    } else if (repoUrlFromRepository(this.pack.repository) === atom.branding.urlCoreRepo) {
       // Don't hit the web for our bundled packages. Just use the local image.
       this.refs.avatar.src = `file://${path.join(process.resourcesPath, "pulsar.png")}`;
     } else {
