@@ -10097,6 +10097,10 @@ tr46@~0.0.1, tr46@~0.0.3:
   version "0.0.0"
   uid ""
 
+"tranquil-theme-icons@link:../tranquil-theme-icons":
+  version "0.0.0"
+  uid ""
+
 "tranquil-theme-light@link:../tranquil-theme-light":
   version "0.0.0"
   uid ""
