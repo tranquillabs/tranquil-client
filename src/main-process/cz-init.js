@@ -18,6 +18,18 @@ const path = require('path');
 // });
 
 app.on('web-contents-created', (...[, /* event */ webContents]) => {
+  webContents.on('before-input-event', (event, input) => {
+    if (webContents.getType() !== 'webview') return;
+    if (input.type !== 'keyDown' || input.key !== 'r') return;
+    if (!input.meta) return;
+    event.preventDefault();
+    if (input.shift) {
+      webContents.reloadIgnoringCache();
+    } else {
+      webContents.reload();
+    }
+  });
+
   //Webview is being shown here as a window type
   webContents.on(
     'context-menu',
