@@ -37,7 +37,7 @@ const configSchema = {
       },
       disabledPackages: {
         type: 'array',
-        default: [],
+        default: ['wrap-guide', 'welcome', 'github', 'deprecation-cop'],
 
         items: {
           type: 'string'

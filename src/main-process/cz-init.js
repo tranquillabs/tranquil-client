@@ -6,6 +6,7 @@ const {
   ipcMain,
   ipcRenderer,
   globalShortcut,
+  dialog,
 } = require('electron');
 const path = require('path');
 
@@ -176,6 +177,15 @@ ipcMain.on('open-link-in-new-window', (event, arg) => {
   );
 });
 
+ipcMain.handle('show-save-url-dialog', async (event, { defaultPath }) => {
+  const win = BrowserWindow.fromWebContents(event.sender) || BrowserWindow.getFocusedWindow();
+  return dialog.showSaveDialog(win, {
+    defaultPath,
+    filters: [{ name: 'URL Shortcut', extensions: ['url'] }],
+    showsTagField: false,
+  });
+});
+
 ipcMain.on('add-link-to-treeview', (event, arg) => {
   BrowserWindow.getFocusedWindow()?.webContents?.send(
     'add-link-to-treeview',
@@ -217,18 +227,13 @@ const addGlobalShortcuts = (arg) => {
     });
   });
 
-  globalShortcut.register('CommandOrControl+F', function () {
-    const view = BrowserWindow.getFocusedWindow();
-    view.webContents.send('close-find', {});
-    view.webContents.send('on-find', {});
-  });
+
 };
 const removeGlobalShortcuts = () => {
   globalShortcut.unregister('CommandOrControl+numsub');
   globalShortcut.unregister('CommandOrControl+numadd');
   globalShortcut.unregister('CommandOrControl+-');
   globalShortcut.unregister('CommandOrControl+=');
-  globalShortcut.unregister('CommandOrControl+F');
 };
 ipcMain.on('add-instance-events', (event, arg) => {
   addGlobalShortcuts(arg);
