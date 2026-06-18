@@ -303,6 +303,72 @@ class WorkspaceElement extends HTMLElement {
     );
     this.verticalAxis.appendChild(this.panelContainers.bottom);
 
+    const DOCK_RESIZE_HIT_AREA = 8;
+
+    const leftDock = this.model.getLeftDock();
+    this.panelContainers.left.addEventListener('mousedown', event => {
+      if (!leftDock.isVisible()) return;
+      const rect = this.panelContainers.left.getBoundingClientRect();
+      if (event.clientX >= rect.right - DOCK_RESIZE_HIT_AREA) {
+        leftDock.handleResizeHandleDragStart();
+      }
+    });
+    this.panelContainers.left.addEventListener('mousemove', event => {
+      if (!leftDock.isVisible()) return;
+      const rect = this.panelContainers.left.getBoundingClientRect();
+      this.panelContainers.left.classList.toggle(
+        'left-dock-resize-hover',
+        event.clientX >= rect.right - DOCK_RESIZE_HIT_AREA
+      );
+    });
+    this.panelContainers.left.addEventListener('mouseleave', () => {
+      this.panelContainers.left.classList.remove('left-dock-resize-hover');
+    });
+
+    const rightDock = this.model.getRightDock();
+    this.panelContainers.right.addEventListener('mousedown', event => {
+      if (!rightDock.isVisible()) return;
+      const rect = this.panelContainers.right.getBoundingClientRect();
+      if (event.clientX <= rect.left + DOCK_RESIZE_HIT_AREA) {
+        rightDock.handleResizeHandleDragStart();
+      }
+    });
+    this.panelContainers.right.addEventListener('mousemove', event => {
+      if (!rightDock.isVisible()) return;
+      const rect = this.panelContainers.right.getBoundingClientRect();
+      this.panelContainers.right.classList.toggle(
+        'right-dock-resize-hover',
+        event.clientX <= rect.left + DOCK_RESIZE_HIT_AREA
+      );
+    });
+    this.panelContainers.right.addEventListener('mouseleave', () => {
+      this.panelContainers.right.classList.remove('right-dock-resize-hover');
+    });
+
+    const bottomDock = this.model.getBottomDock();
+    const BOTTOM_RESIZE_HIT_AREA = DOCK_RESIZE_HIT_AREA;
+
+    this.panelContainers.bottom.addEventListener('mousedown', event => {
+      if (!bottomDock.isVisible()) return;
+      const rect = this.panelContainers.bottom.getBoundingClientRect();
+      if (event.clientY <= rect.top + BOTTOM_RESIZE_HIT_AREA) {
+        bottomDock.handleResizeHandleDragStart();
+      }
+    });
+
+    this.panelContainers.bottom.addEventListener('mousemove', event => {
+      if (!bottomDock.isVisible()) return;
+      const rect = this.panelContainers.bottom.getBoundingClientRect();
+      this.panelContainers.bottom.classList.toggle(
+        'bottom-dock-resize-hover',
+        event.clientY <= rect.top + BOTTOM_RESIZE_HIT_AREA
+      );
+    });
+
+    this.panelContainers.bottom.addEventListener('mouseleave', () => {
+      this.panelContainers.bottom.classList.remove('bottom-dock-resize-hover');
+    });
+
     this.insertBefore(this.panelContainers.header, this.horizontalAxis);
     this.appendChild(this.panelContainers.footer);
 

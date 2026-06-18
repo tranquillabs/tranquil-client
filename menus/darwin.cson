@@ -131,6 +131,14 @@
     submenu: [
       { label: 'Toggle Full Screen', command: 'window:toggle-full-screen' }
       {
+        label: 'Panels'
+        submenu: [
+          { label: 'Toggle Left Panel', command: 'window:toggle-left-dock', accelerator: 'Cmd+B' }
+          { label: 'Toggle Right Panel', command: 'window:toggle-right-dock', accelerator: 'Alt+Cmd+B' }
+          { label: 'Toggle Bottom Panel', command: 'window:toggle-bottom-dock', accelerator: 'Cmd+J' }
+        ]
+      }
+      {
         label: 'Panes'
         submenu: [
           { label: 'Split Up', command: 'pane:split-up-and-copy-active-item' }

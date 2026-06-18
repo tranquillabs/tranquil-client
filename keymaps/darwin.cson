@@ -29,6 +29,9 @@
   'ctrl-alt-cmd-l': 'window:reload'
   'alt-cmd-i': 'window:toggle-dev-tools'
   'cmd-alt-ctrl-p': 'window:run-package-specs'
+  'cmd-b': 'window:toggle-left-dock'
+  'alt-cmd-b': 'window:toggle-right-dock'
+  'cmd-j': 'window:toggle-bottom-dock'
   'ctrl-shift-left': 'pane:move-item-left'
   'ctrl-shift-right': 'pane:move-item-right'
 
@@ -179,7 +182,7 @@
   'ctrl-cmd-up': 'editor:move-line-up'
   'ctrl-cmd-down': 'editor:move-line-down'
   'cmd-/': 'editor:toggle-line-comments'
-  'cmd-j': 'editor:join-lines'
+
   'cmd-shift-d': 'editor:duplicate-lines'
   'cmd-shift-l': 'editor:split-selections-into-lines'
   'ctrl-shift-up': 'editor:add-selection-above'
