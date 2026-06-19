@@ -41,6 +41,7 @@ Tranquil's own packages live in separate repos, cloned as siblings of `tranquil-
 | `tranquil-theme-dark` | `tranquillabs/tranquil-theme-dark` | `../tranquil-theme-dark` |
 | `tranquil-theme-icons` | `tranquillabs/tranquil-theme-icons` | `../tranquil-theme-icons` |
 | `tranquil-theme-light` | `tranquillabs/tranquil-theme-light` | `../tranquil-theme-light` |
+| `tranquil-tips` | `tranquillabs/tranquil-tips` | `../tranquil-tips` |
 
 Everything in `packages/` is forked Pulsar. Avoid modifying it.
 
@@ -60,6 +61,7 @@ Owned packages are linked via `link:../` in `package.json` so changes in sibling
 - `"tranquil-theme-dark": "link:../tranquil-theme-dark"`
 - `"tranquil-theme-icons": "link:../tranquil-theme-icons"`
 - `"tranquil-theme-light": "link:../tranquil-theme-light"`
+- `"tranquil-tips": "link:../tranquil-tips"`
 
 ## Dev Setup (First Time)
 
@@ -73,6 +75,7 @@ git clone https://github.com/tranquillabs/tranquil-config.git
 git clone https://github.com/tranquillabs/tranquil-theme-dark.git
 git clone https://github.com/tranquillabs/tranquil-theme-icons.git
 git clone https://github.com/tranquillabs/tranquil-theme-light.git
+git clone https://github.com/tranquillabs/tranquil-tips.git
 cd tranquil-client
 source ~/.nvm/nvm.sh && nvm use
 yarn install
@@ -90,6 +93,7 @@ ln -s /Users/david/Documents/Tranquil/Repos/tranquil-config ~/.tranquil/dev/pack
 ln -s /Users/david/Documents/Tranquil/Repos/tranquil-theme-dark ~/.tranquil/dev/packages/tranquil-theme-dark
 ln -s /Users/david/Documents/Tranquil/Repos/tranquil-theme-icons ~/.tranquil/dev/packages/tranquil-theme-icons
 ln -s /Users/david/Documents/Tranquil/Repos/tranquil-theme-light ~/.tranquil/dev/packages/tranquil-theme-light
+ln -s /Users/david/Documents/Tranquil/Repos/tranquil-tips ~/.tranquil/dev/packages/tranquil-tips
 ```
 
 This is the idiomatic Pulsar approach: packages found in `dev/packages/` are discovered before `packageDependencies` and get `isBundled: false`, so they appear as dev packages rather than core. In production builds the symlinks won't exist and the packages load from `node_modules` as bundled.
