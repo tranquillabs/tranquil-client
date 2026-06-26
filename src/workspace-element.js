@@ -315,14 +315,19 @@ class WorkspaceElement extends HTMLElement {
     });
     this.panelContainers.left.addEventListener('mousemove', event => {
       if (!leftDock.isVisible()) return;
+      if (event.target.closest('.atom-dock-toggle-button')) {
+        this.panelContainers.left.classList.remove('left-dock-resize-hover');
+        this._setResizeArea(false);
+        return;
+      }
       const rect = this.panelContainers.left.getBoundingClientRect();
-      this.panelContainers.left.classList.toggle(
-        'left-dock-resize-hover',
-        event.clientX >= rect.right - DOCK_RESIZE_HIT_AREA
-      );
+      const inHitArea = event.clientX >= rect.right - DOCK_RESIZE_HIT_AREA && event.clientX <= rect.right;
+      this.panelContainers.left.classList.toggle('left-dock-resize-hover', inHitArea);
+      this._setResizeArea(inHitArea);
     });
     this.panelContainers.left.addEventListener('mouseleave', () => {
       this.panelContainers.left.classList.remove('left-dock-resize-hover');
+      this._setResizeArea(false);
     });
 
     const rightDock = this.model.getRightDock();
@@ -335,14 +340,19 @@ class WorkspaceElement extends HTMLElement {
     });
     this.panelContainers.right.addEventListener('mousemove', event => {
       if (!rightDock.isVisible()) return;
+      if (event.target.closest('.atom-dock-toggle-button')) {
+        this.panelContainers.right.classList.remove('right-dock-resize-hover');
+        this._setResizeArea(false);
+        return;
+      }
       const rect = this.panelContainers.right.getBoundingClientRect();
-      this.panelContainers.right.classList.toggle(
-        'right-dock-resize-hover',
-        event.clientX <= rect.left + DOCK_RESIZE_HIT_AREA
-      );
+      const inHitArea = event.clientX <= rect.left + DOCK_RESIZE_HIT_AREA && event.clientX >= rect.left;
+      this.panelContainers.right.classList.toggle('right-dock-resize-hover', inHitArea);
+      this._setResizeArea(inHitArea);
     });
     this.panelContainers.right.addEventListener('mouseleave', () => {
       this.panelContainers.right.classList.remove('right-dock-resize-hover');
+      this._setResizeArea(false);
     });
 
     const bottomDock = this.model.getBottomDock();
@@ -358,15 +368,20 @@ class WorkspaceElement extends HTMLElement {
 
     this.panelContainers.bottom.addEventListener('mousemove', event => {
       if (!bottomDock.isVisible()) return;
+      if (event.target.closest('.atom-dock-toggle-button')) {
+        this.panelContainers.bottom.classList.remove('bottom-dock-resize-hover');
+        this._setResizeArea(false);
+        return;
+      }
       const rect = this.panelContainers.bottom.getBoundingClientRect();
-      this.panelContainers.bottom.classList.toggle(
-        'bottom-dock-resize-hover',
-        event.clientY <= rect.top + BOTTOM_RESIZE_HIT_AREA
-      );
+      const inHitArea = event.clientY <= rect.top + BOTTOM_RESIZE_HIT_AREA && event.clientY >= rect.top;
+      this.panelContainers.bottom.classList.toggle('bottom-dock-resize-hover', inHitArea);
+      this._setResizeArea(inHitArea);
     });
 
     this.panelContainers.bottom.addEventListener('mouseleave', () => {
       this.panelContainers.bottom.classList.remove('bottom-dock-resize-hover');
+      this._setResizeArea(false);
     });
 
     this.insertBefore(this.panelContainers.header, this.horizontalAxis);
@@ -412,9 +427,10 @@ class WorkspaceElement extends HTMLElement {
   }
 
   handleCenterEnter(event) {
-    // Just re-entering the center isn't enough to hide the dock toggle buttons, since they poke
-    // into the center and we want to give an affordance.
     this.cursorInCenter = true;
+    if (this.hoveredDock) {
+      this.updateHoveredDock({ x: event.pageX, y: event.pageY });
+    }
     this.checkCleanupDockHoverEvents();
   }
 
@@ -422,11 +438,22 @@ class WorkspaceElement extends HTMLElement {
     // If the cursor leaves the center, we start listening to determine whether one of the docs is
     // being hovered.
     this.cursorInCenter = false;
-    this.updateHoveredDock({ x: event.pageX, y: event.pageY });
+    if (!this._inResizeArea) {
+      this.updateHoveredDock({ x: event.pageX, y: event.pageY });
+    }
     window.addEventListener('dragend', this.handleDockDragEnd);
   }
 
+  _setResizeArea(active) {
+    if (active === this._inResizeArea) return;
+    this._inResizeArea = active;
+    if (active && this.hoveredDock) {
+      this.hoveredDock.setHovered(false);
+    }
+  }
+
   handleEdgesMouseMove(event) {
+    if (this._inResizeArea) return;
     this.updateHoveredDock({ x: event.pageX, y: event.pageY });
   }
 
@@ -435,10 +462,14 @@ class WorkspaceElement extends HTMLElement {
   }
 
   updateHoveredDock(mousePosition) {
-    // If we haven't left the currently hovered dock, don't change anything.
+    // Use exit detection (45px grace zone) only when cursor is outside the center pane.
+    // When cursor is in the center, switch to entry detection so the hover clears as
+    // soon as the cursor is no longer within the dock's entry zone — otherwise the
+    // toggle button can stay visible indefinitely if the cursor stops within the grace zone.
+    const detectingExit = !this.cursorInCenter;
     if (
       this.hoveredDock &&
-      this.hoveredDock.pointWithinHoverArea(mousePosition, true)
+      this.hoveredDock.pointWithinHoverArea(mousePosition, detectingExit)
     )
       return;
 
@@ -447,10 +478,33 @@ class WorkspaceElement extends HTMLElement {
       this.model.getRightDock(),
       this.model.getBottomDock()
     ];
-    const nextHoveredDock = docks.find(
-      dock =>
-        dock !== this.hoveredDock && dock.pointWithinHoverArea(mousePosition)
-    );
+    // For entry detection, use panel container bounds directly — do NOT call
+    // pointWithinHoverArea here. pointWithinHoverArea checks toggle button bounds
+    // unconditionally, even during the hide animation. For the left dock the hide
+    // animation translates the inner leftward (into the dock area), so it keeps
+    // returning true for positions inside panelContainers.left even after the dock
+    // is un-hovered, causing a re-hover cycle. Right/bottom don't exhibit this
+    // because their animations move the inner away from center. The keep-hovered
+    // early return above still uses pointWithinHoverArea correctly for exit detection
+    // and for keeping the dock hovered while cursor is on the visible toggle button.
+    const nextHoveredDock = docks.find(dock => {
+      if (dock === this.hoveredDock) return false;
+      switch (dock.location) {
+        case 'left': {
+          const r = this.panelContainers.left.getBoundingClientRect();
+          return mousePosition.x <= r.right;
+        }
+        case 'right': {
+          const r = this.panelContainers.right.getBoundingClientRect();
+          return mousePosition.x >= r.left;
+        }
+        case 'bottom': {
+          const r = this.panelContainers.bottom.getBoundingClientRect();
+          return mousePosition.y >= r.top;
+        }
+        default: return false;
+      }
+    });
     docks.forEach(dock => {
       dock.setHovered(dock === nextHoveredDock);
     });
