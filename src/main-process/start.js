@@ -37,6 +37,7 @@ module.exports = function start(resourcePath, devResourcePath, startTime) {
   });
 
   app.commandLine.appendSwitch('enable-experimental-web-platform-features');
+  app.commandLine.appendSwitch('remote-debugging-port', '9222');
 
   const args = parseCommandLine(process.argv.slice(1));
 
