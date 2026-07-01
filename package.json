@@ -28,6 +28,8 @@
   "dependencies": {
     "tranquil-automations": "link:../tranquil-automations",
     "tranquil-browser": "link:../tranquil-browser",
+    "tranquil-business-dark": "link:../tranquil-business-dark",
+    "tranquil-business-light": "link:../tranquil-business-light",
     "tranquil-theme-dark": "link:../tranquil-theme-dark",
     "tranquil-theme-icons": "link:../tranquil-theme-icons",
     "tranquil-theme-light": "link:../tranquil-theme-light",
@@ -200,6 +202,8 @@
   "packageDependencies": {
     "tranquil-automations": "link:../tranquil-automations",
     "tranquil-browser": "link:../tranquil-browser",
+    "tranquil-business-dark": "link:../tranquil-business-dark",
+    "tranquil-business-light": "link:../tranquil-business-light",
     "tranquil-config": "link:../tranquil-config",
     "tranquil-theme-dark": "link:../tranquil-theme-dark",
     "tranquil-theme-icons": "link:../tranquil-theme-icons",
