@@ -176,7 +176,7 @@ cp /Users/david/.claude/plans/with-phase-2-done-crispy-lovelace.md \
 Also create `docs/dev/tranquil-client-overview.md` capturing:
 - What Tranquil is (Pulsar fork + Tranquil packages)
 - The 5 custom packages and their purpose
-- How to run locally (yarn start, dev mode, pms-accounts)
+- How to run locally (yarn start, dev mode)
 - How to sync with upstream Pulsar (see sync strategy below)
 - Where to find the Claude plans that preceded this repo
 

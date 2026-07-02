@@ -100,17 +100,13 @@ This is the idiomatic Pulsar approach: packages found in `dev/packages/` are dis
 
 ## Dev Startup
 
-`yarn start` runs `scripts/dev.js` which:
-1. Finds a free port
-2. Starts pms-accounts (Vite/SvelteKit) via `node <pms-accounts>/node_modules/vite/bin/vite.js`
-3. Polls until pms-accounts is ready
-4. Spawns Electron with `PMS_ACCOUNTS_PORT` set
+`yarn start` runs `scripts/dev.js`, which loads `.env` (see `.env-example`) and spawns Electron with `NODE_PATH` and `ATOM_RESOURCE_PATH` set.
 
-pms-accounts path is configured via `.env` (see `.env-example`). Node version is managed by `.nvmrc` — always run `nvm use` before `yarn` commands.
+Node version is managed by `.nvmrc` — always run `nvm use` before `yarn` commands.
 
 ## IPC Architecture
 
-- pms-accounts webview preload → `contextBridge.exposeInMainWorld` → `ipcRenderer.send` → ipcMain
+- Owned webview preload (`tranquil-automations` / `tranquil-browser`) → `contextBridge.exposeInMainWorld` → `ipcRenderer.send` → ipcMain
 - `src/main-process/cz-init.js` forwards IPC events from ipcMain to all renderer windows via `BrowserWindow.getAllWindows().forEach(win => win.webContents.send(...))`
 - Renderer (`apm-automations`) listens on `ipcRenderer` for events forwarded from cz-init
 

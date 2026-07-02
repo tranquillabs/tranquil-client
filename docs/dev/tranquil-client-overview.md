@@ -21,7 +21,7 @@ Owned packages live in their own repos, cloned as siblings of `tranquil-client`,
 
 | Package | Repo | Purpose |
 | --- | --- | --- |
-| `tranquil-automations` | `tranquillabs/tranquil-automations` | PMS provider automation: login modal, pms-accounts webview, IPC bridges, credential injection, PostHog tracking |
+| `tranquil-automations` | `tranquillabs/tranquil-automations` | Browser-webview automation (runs JS scripts against tabs via Puppeteer/CDP), business-theme mockups + custom pane controls, tree-view folder-count badges |
 | `tranquil-browser` | `tranquillabs/tranquil-browser` | Embedded browser panel: tab management, `.url` file handling, URL bar, favourites, find-in-page |
 | `tranquil-theme-dark` | `tranquillabs/tranquil-theme-dark` | Dark UI theme (default) |
 | `tranquil-theme-light` | `tranquillabs/tranquil-theme-light` | Light UI theme |
@@ -40,29 +40,23 @@ yarn install
 # 2. Rebuild native modules against Electron 30
 yarn build
 
-# 3. (Optional) Run pms-accounts locally for dev login
-cd /path/to/system-***REMOVED***
-pnpm --filter pms-accounts dev   # starts at http://localhost:5173
-
-# 4. Launch Tranquil (must run from a user terminal — Electron can't start from a subprocess)
+# 3. Launch Tranquil (must run from a user terminal — Electron can't start from a subprocess)
 cd /Users/david/Documents/Tranquil/Repos/tranquil-client
 yarn start                        # prod mode
-yarn start -- -d                  # dev mode (routes login to localhost:5173)
+yarn start -- -d                  # dev mode
 ```
 
-Dev mode (`-d` flag) sets `atom.inDevMode() === true`, which routes `tranquil-automations` to the local pms-accounts server instead of the production URL.
+Dev mode (`-d` flag) sets `atom.inDevMode() === true`.
 
 ---
 
 ## IPC Architecture
 
-Three IPC layers connect Tranquil's parts:
+The active IPC path is **renderer ↔ Electron main**: owned renderer packages talk to the main process via `ipcRenderer`/`ipcMain`, and `src/main-process/cz-init.js` forwards events to all windows (`BrowserWindow.getAllWindows().forEach(...)`). Live traffic includes `uri-message` (deep links → `tranquil-automations`), tab focus, zoom, and context-menu actions.
 
-1. **pms-accounts webview ↔ renderer** (`preload-client.js` + `apm-view.js`) — login/logout signals
-2. **renderer ↔ Electron main** (`cz-init.js` + `tranquil-automations.js`) — session, tabs, shortcuts
-3. **PMS site webviews ↔ renderer** (`system-***REMOVED***/apps/hub/src/preload.cjs`) — credential injection
+`cz-init.js` also defines dormant session handlers — `logout-session`, `show-login-screen`, `hide-login-screen`, `electron-signed-in-email` — left over from an earlier login flow. No renderer currently listens for them; there is no login/logout UI wired up today.
 
-See `../tranquil-automations/lib/` for full details.
+See `../tranquil-automations/lib/tranquil-automations.js` and `src/main-process/cz-init.js` for details.
 
 ---
 
