@@ -26,6 +26,7 @@
   "license": "MIT",
   "electronVersion": "30.5.1",
   "dependencies": {
+    "tranquil-rpc": "link:../tranquil-rpc",
     "tranquil-automations": "link:../tranquil-automations",
     "tranquil-browser": "link:../tranquil-browser",
     "tranquil-business-dark": "link:../tranquil-business-dark",
@@ -200,6 +201,7 @@
     "yargs": "17.6.2"
   },
   "packageDependencies": {
+    "tranquil-rpc": "link:../tranquil-rpc",
     "tranquil-automations": "link:../tranquil-automations",
     "tranquil-browser": "link:../tranquil-browser",
     "tranquil-business-dark": "link:../tranquil-business-dark",
