@@ -7,8 +7,14 @@ const {
   ipcRenderer,
   globalShortcut,
   dialog,
+  session,
 } = require('electron');
 const path = require('path');
+const { registerHarIpc } = require('./har.js');
+
+// HAR capture (hidden-window DevTools Protocol recording) + offline replay
+// (per-archive session interception) for the Tranquil browser. See har.js.
+registerHarIpc({ ipcMain, session, dialog, BrowserWindow, app });
 
 // Uncomment this to test the updater in dev mode
 // Object.defineProperty(app, 'isPackaged', {
