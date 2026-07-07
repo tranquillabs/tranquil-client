@@ -12,6 +12,7 @@ const { getAppName } = require('../get-app-details.js');
 const path = require('path');
 const fs = require('fs');
 const url = require('url');
+const crypto = require('crypto');
 const { EventEmitter } = require('events');
 const StartupTime = require('../startup-time');
 
@@ -30,6 +31,11 @@ module.exports = class AtomWindow extends EventEmitter {
     super();
 
     this.id = nextId++;
+    // Durable per-window session id. Every browser <webview> in this window uses
+    // `persist:tb-window-<windowSessionId>` so each window is its own cookie/login
+    // jar. A restored window reuses its saved id (see AtomApplication's
+    // save/loadPreviousWindowOptions); a brand-new window mints a fresh one.
+    this.windowSessionId = settings.windowSessionId || crypto.randomUUID();
     this.atomApplication = atomApplication;
     this.fileRecoveryService = fileRecoveryService;
     this.isSpec = settings.isSpec;
@@ -127,6 +133,10 @@ module.exports = class AtomWindow extends EventEmitter {
       location => location.pathToOpen && !location.isDirectory
     );
     this.loadSettings.initialProjectRoots = this.projectRoots;
+    // Expose the per-window session id to the renderer (read via
+    // atom.getLoadSettings().windowSessionId) so the browser can partition its
+    // webviews per window.
+    this.loadSettings.windowSessionId = this.windowSessionId;
 
     StartupTime.addMarker('main-process:atom-window:end');
 

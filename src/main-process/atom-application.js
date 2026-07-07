@@ -356,6 +356,7 @@ module.exports = class AtomApplication extends EventEmitter {
       clearWindowState,
       addToLastWindow,
       preserveFocus,
+      windowSessionId,
       env
     } = options;
 
@@ -395,6 +396,7 @@ module.exports = class AtomApplication extends EventEmitter {
         clearWindowState,
         addToLastWindow,
         preserveFocus,
+        windowSessionId,
         env
       });
     } else if (urlsToOpen && urlsToOpen.length > 0) {
@@ -415,6 +417,7 @@ module.exports = class AtomApplication extends EventEmitter {
         clearWindowState,
         addToLastWindow,
         preserveFocus,
+        windowSessionId,
         env
       });
     }
@@ -922,6 +925,14 @@ module.exports = class AtomApplication extends EventEmitter {
       })
     );
 
+    // The browser's "Open link/tab in new window" sends this; open a fresh
+    // (per-window-isolated) window and load the URL as a browser tab in it.
+    this.disposable.add(
+      ipcHelpers.on(ipcMain, 'application:new-window-open-url', (event, { url }) => {
+        this.openUrlInNewWindow(url);
+      })
+    );
+
     this.disposable.add(
       ipcHelpers.on(ipcMain, 'window-command', (event, command, ...args) => {
         const window = BrowserWindow.fromWebContents(event.sender);
@@ -1237,6 +1248,7 @@ module.exports = class AtomApplication extends EventEmitter {
     window,
     clearWindowState,
     addToLastWindow,
+    windowSessionId,
     env
   } = {}) {
     return this.openPaths({
@@ -1249,8 +1261,34 @@ module.exports = class AtomApplication extends EventEmitter {
       window,
       clearWindowState,
       addToLastWindow,
+      windowSessionId,
       env
     });
+  }
+
+  // Opens a URL in a brand-new window as a browser tab. Because every window
+  // carries its own windowSessionId (per-window session isolation), the URL
+  // loads in a fresh cookie/login jar — this is the "open this link in a new
+  // isolated login" path behind the browser's "Open link/tab in new window".
+  //
+  // We open an empty new window and, once its renderer is ready, tell it to
+  // atom.workspace.open(url). The main process can't route an http URL through
+  // the tranquil-browser:// opener itself (openPaths is path-oriented), so the
+  // renderer does the open.
+  async openUrlInNewWindow(url) {
+    if (!url) return;
+    const targetWindow = this.focusedWindow();
+    const openedWindow = await this.openPath({
+      pathToOpen: null,
+      newWindow: true,
+      devMode: targetWindow ? targetWindow.devMode : false,
+      safeMode: targetWindow ? targetWindow.safeMode : false
+    });
+    if (!openedWindow) return;
+    openedWindow.loadedPromise.then(() =>
+      openedWindow.browserWindow.webContents.send('open-url-in-window', url)
+    );
+    return openedWindow;
   }
 
   // Public: Opens multiple paths, in existing windows if possible.
@@ -1279,6 +1317,7 @@ module.exports = class AtomApplication extends EventEmitter {
     clearWindowState,
     addToLastWindow,
     preserveFocus,
+    windowSessionId,
     env
   } = {}) {
     if (!env) env = process.env;
@@ -1423,6 +1462,7 @@ module.exports = class AtomApplication extends EventEmitter {
         windowDimensions,
         profileStartup,
         clearWindowState,
+        windowSessionId,
         env
       });
       openedWindow.preserveFocus = preserveFocus;
@@ -1505,7 +1545,10 @@ module.exports = class AtomApplication extends EventEmitter {
       version: APPLICATION_STATE_VERSION,
       windows: windows
         .filter(window => !window.isSpec)
-        .map(window => ({ projectRoots: window.projectRoots }))
+        .map(window => ({
+          projectRoots: window.projectRoots,
+          windowSessionId: window.windowSessionId
+        }))
     };
     state.windows.reverse();
 
@@ -1523,9 +1566,13 @@ module.exports = class AtomApplication extends EventEmitter {
 
     if (state.version === APPLICATION_STATE_VERSION) {
       // Pulsar >=1.36.1
-      // Schema: {version: '1', windows: [{projectRoots: ['<root-dir>', ...]}, ...]}
+      // Schema: {version: '1', windows: [{projectRoots: ['<root-dir>', ...],
+      //   windowSessionId: '<uuid>'}, ...]}
+      // windowSessionId is additive: entries written before this field simply
+      // lack it, so the restored window mints a fresh id (no schema version bump).
       return state.windows.map(each => ({
         foldersToOpen: each.projectRoots,
+        windowSessionId: each.windowSessionId,
         devMode: this.devMode,
         safeMode: this.safeMode,
         newWindow: true
