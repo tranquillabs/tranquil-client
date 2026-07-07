@@ -11,6 +11,7 @@ const {
 } = require('electron');
 const path = require('path');
 const { registerHarIpc } = require('./har.js');
+const { manageBrowserColorScheme } = require('./tb-color-scheme.js');
 
 // HAR capture (hidden-window DevTools Protocol recording) + offline replay
 // (per-archive session interception) for the Tranquil browser. See har.js.
@@ -24,6 +25,11 @@ registerHarIpc({ ipcMain, session, dialog, BrowserWindow, app });
 // });
 
 app.on('web-contents-created', (...[, /* event */ webContents]) => {
+  // Isolate browser <webview> guests from the editor-driven nativeTheme so
+  // websites follow the OS appearance, not the dark editor theme. See
+  // tb-color-scheme.js.
+  manageBrowserColorScheme(webContents);
+
   webContents.on('before-input-event', (event, input) => {
     if (webContents.getType() !== 'webview') return;
     if (input.type !== 'keyDown' || input.key !== 'r') return;
