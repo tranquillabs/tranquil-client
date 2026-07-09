@@ -29,6 +29,16 @@
 // appearance (see note above).
 const GUEST_SCHEME = 'light';
 
+// Pinning prefers-color-scheme only fixes sites whose *own* stylesheet keys off
+// the media query. It does NOT change the renderer's default canvas color: when
+// themeSource is forced dark, Chromium paints the "author set no background"
+// backdrop dark, so the editor's dark chrome effectively shows through any page
+// that never sets its own html/body background (e.g. a bare Markdown-export
+// page). setDefaultBackgroundColorOverride forces that base color, so an
+// unstyled page reads as a conventional white browser canvas. Matches
+// GUEST_SCHEME = 'light'.
+const GUEST_DEFAULT_BG = { r: 255, g: 255, b: 255, a: 1 };
+
 // Guest webContents we currently manage (for cleanup / dedupe).
 const managed = new Set();
 
@@ -41,6 +51,11 @@ function applyScheme(wc) {
   dbg
     .sendCommand('Emulation.setEmulatedMedia', {
       features: [{ name: 'prefers-color-scheme', value: GUEST_SCHEME }],
+    })
+    .catch(() => {});
+  dbg
+    .sendCommand('Emulation.setDefaultBackgroundColorOverride', {
+      color: GUEST_DEFAULT_BG,
     })
     .catch(() => {});
 }
