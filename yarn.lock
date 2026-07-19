@@ -3235,6 +3235,11 @@ caniuse-lite@1.0.30001799, caniuse-lite@^1.0.30001746:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001799.tgz#5c909138c27f1a61219d3e092071c1cc7d32dc55"
   integrity sha512-hG1bReV+OUU+MOqK4t/ZWI0tZOyz3rqS9XuhOUz1cIcbwBKjOyJEJuw9ER5JuNyqxNk8u/JUVbGibBOL1yrjFw==
 
+capnweb@0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/capnweb/-/capnweb-0.9.0.tgz#dd0f370449ae1012370527d6082663e472aa41e0"
+  integrity sha512-kZ0vg55E+gkuKHNHTXrizb5hMbD0IVCJ0lY/WHmcin7YiwvgG77RT3OTRW/zdS9rtBcjT8xGAF1TG35whR2cyA==
+
 caseless@~0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
@@ -10394,7 +10399,7 @@ tr46@~0.0.1, tr46@~0.0.3:
   version "0.0.0"
   uid ""
 
-"tranquil-theme-dark@link:../tranquil-theme-dark":
+"tranquil-rpc@link:../tranquil-rpc":
   version "0.0.0"
   uid ""
 
@@ -10402,11 +10407,11 @@ tr46@~0.0.1, tr46@~0.0.3:
   version "0.0.0"
   uid ""
 
-"tranquil-theme-light@link:../tranquil-theme-light":
+"tranquil-tips@link:../tranquil-tips":
   version "0.0.0"
   uid ""
 
-"tranquil-tips@link:../tranquil-tips":
+"tranquil-window-color@link:../tranquil-window-color":
   version "0.0.0"
   uid ""
 

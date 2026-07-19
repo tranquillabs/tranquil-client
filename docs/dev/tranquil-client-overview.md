@@ -10,8 +10,6 @@ Tranquil is a fork of [Pulsar](https://pulsar-edit.dev/) (Electron 30, Node 20) 
 - `tranquillabs/tranquil-automations` — login/session automation package
 - `tranquillabs/tranquil-browser` — embedded browser package
 - `tranquillabs/tranquil-config` — secrets/config package
-- `tranquillabs/tranquil-theme-dark` — dark UI theme
-- `tranquillabs/tranquil-theme-light` — light UI theme
 
 ---
 
@@ -23,8 +21,6 @@ Owned packages live in their own repos, cloned as siblings of `tranquil-client`,
 | --- | --- | --- |
 | `tranquil-automations` | `tranquillabs/tranquil-automations` | Browser-webview automation (runs JS scripts against tabs via Puppeteer/CDP), business-theme mockups + custom pane controls, tree-view folder-count badges |
 | `tranquil-browser` | `tranquillabs/tranquil-browser` | Embedded browser panel: tab management, `.url` file handling, URL bar, favourites, find-in-page |
-| `tranquil-theme-dark` | `tranquillabs/tranquil-theme-dark` | Dark UI theme (default) |
-| `tranquil-theme-light` | `tranquillabs/tranquil-theme-light` | Light UI theme |
 | `tranquil-config` | `tranquillabs/tranquil-config` | Secrets injection — provides `posthog_key` and `github_token` |
 
 **Hub main-process customisation:** `src/main-process/cz-init.js` — wires IPC for session management, context menus, tab routing, and zoom. Required by `src/main-process/start.js`.
