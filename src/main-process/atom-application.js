@@ -1328,7 +1328,7 @@ module.exports = class AtomApplication extends EventEmitter {
     safeMode = Boolean(safeMode);
     clearWindowState = Boolean(clearWindowState);
 
-    const locationsToOpen = await Promise.all(
+    let locationsToOpen = await Promise.all(
       pathsToOpen.map(pathToOpen =>
         this.parsePathToOpen(pathToOpen, executedFrom, {
           hasWaitSession: pidToKillWhenClosed != null
@@ -1345,6 +1345,20 @@ module.exports = class AtomApplication extends EventEmitter {
         isDirectory: true,
         hasWaitSession: pidToKillWhenClosed != null
       });
+    }
+
+    // Tranquil: isolated GUI-verification launches (scripts/verify.js sets
+    // TRANQUIL_VERIFY) run `electron . <project>`, so the Electron app-dir
+    // positional `.` resolves to the tranquil-client resource path and would open
+    // the app's own source as a project alongside the real one. Drop the
+    // resource-path location so only the intended project opens — but only when
+    // another location remains, so a plain `yarn start` still opens tranquil-client.
+    if (process.env.TRANQUIL_VERIFY && this.resourcePath) {
+      const resource = path.normalize(this.resourcePath);
+      const filtered = locationsToOpen.filter(
+        location => path.normalize(location.pathToOpen || '.') !== resource
+      );
+      if (filtered.length > 0) locationsToOpen = filtered;
     }
 
     if (locationsToOpen.length === 0) {

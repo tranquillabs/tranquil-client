@@ -311,6 +311,7 @@
     "build": "electron-rebuild",
     "build:apm": "cd ppm && yarn install",
     "start": "node scripts/dev.js",
+    "verify": "node scripts/verify.js",
     "dist": "node script/electron-builder.js",
     "js-docs": "jsdoc2md --files src --configure docs/.jsdoc.json > ./docs/Pulsar-API-Documentation.md",
     "private-js-docs": "jsdoc2md --private --files src --configure docs/.jsdoc.json > ./docs/Source-Code-Documentation.md",
