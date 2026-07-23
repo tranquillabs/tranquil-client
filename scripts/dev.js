@@ -1,12 +1,47 @@
 #!/usr/bin/env node
 
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, execFileSync } = require('child_process');
 
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
+// In dev we launch Electron's own unbranded app bundle, so on macOS the bold
+// application-menu title and dock label are taken from that bundle's Info.plist
+// (CFBundleName / CFBundleDisplayName), which read "Electron". app.setName() does
+// NOT override this for the running process — the OS reads the plist at launch.
+// So patch the bundle's plist to "Tranquil" before spawning. Idempotent and
+// best-effort: any failure just leaves the default name rather than blocking the
+// launch. macOS-only; packaged builds already carry the correct name via
+// electron-builder productName.
+function patchMacAppName(electronBin) {
+  if (process.platform !== 'darwin') return;
+  // electronBin = .../Electron.app/Contents/MacOS/Electron → Contents/Info.plist
+  const plist = path.join(path.dirname(path.dirname(electronBin)), 'Info.plist');
+  const NAME = 'Tranquil';
+  for (const key of ['CFBundleName', 'CFBundleDisplayName']) {
+    try {
+      const current = execFileSync(
+        '/usr/libexec/PlistBuddy',
+        ['-c', `Print :${key}`, plist],
+        { encoding: 'utf8' }
+      ).trim();
+      if (current !== NAME) {
+        execFileSync('/usr/libexec/PlistBuddy', [
+          '-c',
+          `Set :${key} ${NAME}`,
+          plist,
+        ]);
+      }
+    } catch {
+      // Key missing or PlistBuddy unavailable — skip; the app still launches.
+    }
+  }
+}
+
 function main() {
   const electronBin = require('electron');
+
+  patchMacAppName(electronBin);
 
   const childEnv = { ...process.env };
   // An agent/IDE shell (e.g. the VSCode extension host) may export
