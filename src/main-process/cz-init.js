@@ -24,11 +24,43 @@ registerHarIpc({ ipcMain, session, dialog, BrowserWindow, app });
 //   }
 // });
 
+// Browser <webview> guests present a configurable, clean User-Agent (no Electron
+// or app tokens). The renderer (tranquil-browser) owns the value and pushes it via
+// 'set-user-agent' whenever it changes; we seed a clean default from the app's own
+// fallback UA so guest requests are clean even before that first push.
+const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const stripAppUaTokens = (ua) =>
+  (ua || '').replace(
+    new RegExp(` (?:${escapeRegExp(app.getName())}|Electron)\\/\\S+`, 'g'),
+    ''
+  );
+let currentUserAgent = stripAppUaTokens(app.userAgentFallback);
+ipcMain.on('set-user-agent', (event, ua) => {
+  if (typeof ua === 'string' && ua.trim()) currentUserAgent = ua.trim();
+});
+// Rewrite the User-Agent header once per guest session (WeakSet-guarded so shared
+// per-window partitions aren't re-bound). The closure reads the live currentUserAgent.
+const uaHeaderSessions = new WeakSet();
+
 app.on('web-contents-created', (...[, /* event */ webContents]) => {
   // Isolate browser <webview> guests from the editor-driven nativeTheme so
   // websites follow the OS appearance, not the dark editor theme. See
   // tb-color-scheme.js.
   manageBrowserColorScheme(webContents);
+
+  // Browser guests only: rewrite the User-Agent header on every outgoing request
+  // (main document + subresources + WebSockets — the last two are missed by the
+  // <webview useragent> attribute / setUserAgent; electron #7203/#7205).
+  if (webContents.getType() === 'webview') {
+    const ses = webContents.session;
+    if (!uaHeaderSessions.has(ses)) {
+      uaHeaderSessions.add(ses);
+      ses.webRequest.onBeforeSendHeaders((details, callback) => {
+        details.requestHeaders['User-Agent'] = currentUserAgent;
+        callback({ requestHeaders: details.requestHeaders });
+      });
+    }
+  }
 
   webContents.on('before-input-event', (event, input) => {
     if (webContents.getType() !== 'webview') return;
