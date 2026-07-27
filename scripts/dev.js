@@ -5,6 +5,104 @@ const { spawn, execFileSync } = require('child_process');
 
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
+// --- dev-console noise filtering -------------------------------------------
+//
+// `--enable-logging` makes Electron forward every renderer's console output AND
+// Chromium's own internal logging to our stderr, each record shaped like:
+//   [PID:MMDD/HHMMSS.mmm:LEVEL:TAG(line)] message[, source: <src> (line)]
+// where TAG is either `CONSOLE(n)` (a renderer console.* call) or a C++ source
+// such as `runtime_features.cc(730)` (Chromium internals). Almost all of it is
+// noise we can't act on. Rather than matching each individual message, classify
+// records by that structure and keep only what's useful — our own logs, real
+// Node warnings, and plain output.
+
+// A forwarded Chromium record always starts with `[<pid>:<timestamp>:LEVEL:`.
+const RECORD_START = /^\[\d+:\d{4}\/[\d.]+:([A-Z]+):/;
+// A renderer console message specifically tags `CONSOLE(line)`.
+const CONSOLE_RECORD = /^\[\d+:\d{4}\/[\d.]+:[A-Z]+:CONSOLE\(\d+\)\]/;
+// Terminator of a console record: Electron appends `, source: <src> (line)` as
+// the final line (single- or multi-line message).
+const CONSOLE_SOURCE = /, source: (\S+)/;
+
+// Explicit content patterns to drop, tested against a fully-assembled console
+// record (message + source, joined). Add narrow RegExps here for one-off
+// console noise the structural rules below don't already cover.
+const LOG_FILTERS = [
+  // A Blink CSS deprecation Chromium injects into our renderer (cites one of our
+  // files as source, so the "local source ⇒ keep" rule wouldn't catch it).
+  /searchfield-cancel-button.*deprecated/,
+];
+
+// Decide whether a fully-assembled console record should be shown. Drops
+// Electron's own injected dev warnings (source `node:electron/…`: the CSP /
+// Node-integration security warnings, `vm` deprecation, …), remote-page console
+// (non-local http origin — third-party cookies, a site's CORS failures, unused
+// font preloads), and anything a LOG_FILTERS pattern matches. Keeps console from
+// local sources (our own code, e.g. tranquil-rpc) and localhost dev servers
+// (browser-sync app-template / automations).
+function keepConsoleRecord(record) {
+  if (LOG_FILTERS.some((re) => re.test(record))) return false;
+  const source = (record.match(CONSOLE_SOURCE) || [])[1] || '';
+  if (source.startsWith('node:electron')) return false;
+  if (/^https?:\/\/(?!localhost|127\.0\.0\.1)/.test(source)) return false;
+  return true;
+}
+
+// Pipe `readable` (a child stdout/stderr) to `out`, applying the classifier.
+// Buffers partial lines across chunks, and accumulates the lines of a
+// multi-line console record until its `source:` terminator so the whole record
+// is judged (and kept/dropped) as a unit.
+function filterStream(readable, out) {
+  let buffer = '';
+  let pending = null; // lines of an in-progress multi-line console record
+
+  const flushPending = () => {
+    if (!pending) return;
+    const record = pending.join('\n');
+    if (keepConsoleRecord(record)) out.write(record + '\n');
+    pending = null;
+  };
+
+  const handleLine = (line) => {
+    // Mid console record: accumulate until the `source:` terminator, then judge.
+    // A new record starting first (missing terminator) flushes what we have.
+    if (pending) {
+      if (RECORD_START.test(line)) flushPending();
+      else {
+        pending.push(line);
+        if (CONSOLE_SOURCE.test(line)) flushPending();
+        return;
+      }
+    }
+    if (CONSOLE_RECORD.test(line)) {
+      if (CONSOLE_SOURCE.test(line)) {
+        if (keepConsoleRecord(line)) out.write(line + '\n'); // single-line
+      } else {
+        pending = [line]; // multi-line; wait for the terminator
+      }
+      return;
+    }
+    if (RECORD_START.test(line)) {
+      // Chromium internal C++ log. Drop INFO/WARNING chatter (runtime_features,
+      // spdy_session, ANGLE/Metal, …); keep ERROR/FATAL — those can be real.
+      const level = RECORD_START.exec(line)[1];
+      if (level !== 'ERROR' && level !== 'FATAL') return;
+    }
+    out.write(line + '\n'); // plain line: Node warning, main-process log, etc.
+  };
+
+  readable.on('data', (chunk) => {
+    buffer += chunk.toString();
+    const lines = buffer.split('\n');
+    buffer = lines.pop(); // trailing element is a possibly-incomplete line
+    for (const line of lines) handleLine(line);
+  });
+  readable.on('end', () => {
+    if (buffer) handleLine(buffer);
+    flushPending();
+  });
+}
+
 // In dev we launch Electron's own unbranded app bundle, so on macOS the bold
 // application-menu title and dock label are taken from that bundle's Info.plist
 // (CFBundleName / CFBundleDisplayName), which read "Electron". app.setName() does
@@ -73,10 +171,15 @@ function main() {
     ['--no-sandbox', '--enable-logging', ...flagArgs, '.', ...pathArgs, '-f'],
     {
       cwd: path.join(__dirname, '..'),
-      stdio: 'inherit',
+      // stdin inherited; stdout/stderr piped so filterStream can drop noise
+      // lines (LOG_FILTERS) before re-emitting to our own stdout/stderr.
+      stdio: ['inherit', 'pipe', 'pipe'],
       env: childEnv,
     }
   );
+
+  filterStream(electronProcess.stdout, process.stdout);
+  filterStream(electronProcess.stderr, process.stderr);
 
   // Forward termination to the Electron child. Without this, a SIGTERM to this
   // wrapper (e.g. stopping a backgrounded launch) exits Node but ORPHANS the

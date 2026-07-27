@@ -277,34 +277,17 @@ ipcMain.on('webview-key-events', (event, arg) => {
   );
 });
 
-const addGlobalShortcuts = (arg) => {
-  globalShortcut.register('CommandOrControl+numsub', function () {
-    BrowserWindow.getFocusedWindow()?.webContents?.send('zoom', {
-      type: 'out',
-      webViewId: arg?.webViewId,
-    });
-  });
-
-  globalShortcut.register('CommandOrControl+numadd', function () {
-    BrowserWindow.getFocusedWindow()?.webContents?.send('zoom', {
-      type: 'in',
-      webViewId: arg?.webViewId,
-    });
-  });
-  globalShortcut.register('CommandOrControl+-', function () {
-    BrowserWindow.getFocusedWindow()?.webContents?.send('zoom', {
-      type: 'out',
-      webViewId: arg?.webViewId,
-    });
-  });
-  globalShortcut.register('CommandOrControl+=', function () {
-    BrowserWindow.getFocusedWindow()?.webContents?.send('zoom', {
-      type: 'in',
-      webViewId: arg?.webViewId,
-    });
-  });
-
-
+// Zoom is driven by process-global accelerators, so they must be (re)registered
+// for whichever browser window currently holds focus. The renderer's `zoom`
+// handler zooms the *active* tab's webview (see tranquil-browser utils.js), so
+// the accelerators just send a plain zoom command — no per-tab webViewId needed.
+const addGlobalShortcuts = () => {
+  const sendZoom = (type) =>
+    BrowserWindow.getFocusedWindow()?.webContents?.send('zoom', { type });
+  globalShortcut.register('CommandOrControl+numsub', () => sendZoom('out'));
+  globalShortcut.register('CommandOrControl+numadd', () => sendZoom('in'));
+  globalShortcut.register('CommandOrControl+-', () => sendZoom('out'));
+  globalShortcut.register('CommandOrControl+=', () => sendZoom('in'));
 };
 const removeGlobalShortcuts = () => {
   globalShortcut.unregister('CommandOrControl+numsub');
@@ -312,15 +295,26 @@ const removeGlobalShortcuts = () => {
   globalShortcut.unregister('CommandOrControl+-');
   globalShortcut.unregister('CommandOrControl+=');
 };
-ipcMain.on('add-instance-events', (event, arg) => {
-  addGlobalShortcuts(arg);
-  BrowserWindow.getFocusedWindow()?.on('focus', () => {
+
+// `add-instance-events` fires once per browser TAB, but the focus/blur wiring
+// that (re)registers the zoom accelerators is a per-WINDOW concern. Wire each
+// window exactly once — the old code stacked a fresh focus+blur listener on the
+// same BrowserWindow for every tab, leaking them (MaxListenersExceededWarning
+// after ~10 tabs). The WeakSet entry drops when the window is destroyed.
+const zoomWiredWindows = new WeakSet();
+ipcMain.on('add-instance-events', (event) => {
+  const win =
+    BrowserWindow.fromWebContents(event.sender) ||
+    BrowserWindow.getFocusedWindow();
+  if (!win || zoomWiredWindows.has(win)) return;
+  zoomWiredWindows.add(win);
+
+  if (win.isFocused()) addGlobalShortcuts();
+  win.on('focus', () => {
     removeGlobalShortcuts();
-    addGlobalShortcuts(arg);
+    addGlobalShortcuts();
   });
-  BrowserWindow.getFocusedWindow()?.on('blur', () => {
-    removeGlobalShortcuts();
-  });
+  win.on('blur', removeGlobalShortcuts);
 });
 
 ipcMain.on('hide-login-screen', (event, payload) => {
