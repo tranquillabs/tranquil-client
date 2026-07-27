@@ -60,6 +60,27 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
         callback({ requestHeaders: details.requestHeaders });
       });
     }
+
+    // Links that ask for a new window/tab — target="_blank" and window.open,
+    // which most cross-domain "external" links use — must be intercepted on the
+    // guest's webContents. Deny the native popup and route the URL back to the
+    // embedding renderer to open as a new browser tab (reusing the same
+    // open-link-in-new-tab flow as cmd-click, so it lands in the source tab's
+    // stack). Plain same-window links (target=_self / none) are unaffected and
+    // navigate in the current tab as usual.
+    webContents.setWindowOpenHandler(({ url }) => {
+      if (url && /^https?:\/\//i.test(url)) {
+        // Same delivery the cmd-click flow uses (ipcMain 'open-link-in-new-tab'
+        // below): send to the focused window — the one whose guest was just
+        // clicked. The renderer handler dedups by id across its per-tab
+        // listeners, so exactly one tab opens.
+        BrowserWindow.getFocusedWindow()?.webContents?.send(
+          'open-link-in-new-tab',
+          { link: url, id: Date.now() }
+        );
+      }
+      return { action: 'deny' };
+    });
   }
 
   webContents.on('before-input-event', (event, input) => {
