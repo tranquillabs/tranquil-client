@@ -1,5 +1,6 @@
 MIT License
 
+Copyright (c) 2026 Tranquil Labs
 Copyright (c) 2022-2026 Pulsar-Edit
 Original work copyright (c) 2011-2022 GitHub Inc.
 

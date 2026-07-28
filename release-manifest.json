@@ -1,0 +1,50 @@
+{
+  "release": "v0.1.0",
+  "date": "2026-07-29",
+  "packages": {
+    "tranquil-automations": {
+      "version": "0.1.0",
+      "sha": "4f6ed6bd5cb78b2231b6e6be30bae72592520f7d"
+    },
+    "tranquil-browser": {
+      "version": "0.1.0",
+      "sha": "922097ea8b03c58be465d357a665580d946cd6ac"
+    },
+    "tranquil-business-dark": {
+      "version": "0.1.0",
+      "sha": "153b03f8e19f2f1637318e37f97ef35481ba0c98"
+    },
+    "tranquil-business-light": {
+      "version": "0.1.0",
+      "sha": "28415577a3f38c7366882b041607568063d5e38b"
+    },
+    "tranquil-config": {
+      "version": "0.1.0",
+      "sha": "6fa961c08476ec86fc2c235e9f04f869760f0d39"
+    },
+    "tranquil-drag-drop": {
+      "version": "0.1.0",
+      "sha": "82abe709a8240dddacaf93141ce9ddc8c78975bd"
+    },
+    "tranquil-examples": {
+      "version": "0.1.0",
+      "sha": "f05fc4748634e226c98b70b4a8a7177706b9892d"
+    },
+    "tranquil-rpc": {
+      "version": "0.1.0",
+      "sha": "af9a087f18cb51546eceac5ed6e5996d56967457"
+    },
+    "tranquil-theme-icons": {
+      "version": "0.1.0",
+      "sha": "42f03dc276c1bef972ceba8bf9d1e794ccca4f91"
+    },
+    "tranquil-tips": {
+      "version": "0.1.0",
+      "sha": "3e0deca4867b83c907c807a05c2fcfe32ac0351c"
+    },
+    "tranquil-window-color": {
+      "version": "0.1.0",
+      "sha": "b5321371d4f4771b790959199ae0459eec7cd0d7"
+    }
+  }
+}
