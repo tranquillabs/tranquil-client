@@ -1,97 +1,66 @@
+<div align="center">
 
-<br>
+<img src="resources/banner.svg" alt="Tranquil Studio" width="720">
 
-<div align = center>
+# Tranquil Studio
 
-[![Badge Discussions]][Discussions]  
-[![Badge Discord]][Discord]  
-[![Badge Reddit]][Reddit]  
-[![Badge Mastodon]][Mastodon]  
-[![Badge Lemmy]][Lemmy]  
+**A desktop code editor rebuilt around a first-class web browser.**
+Web apps open as tabs, links save as files, and pages can be scripted — one workspace for
+the web apps and files your work spans.
 
-[![Badge Status]][Status]  
-[![Badge License]][License]
-
-<br>
-
-# Pulsar
-
-<br>
-
-[![Button Install]][Install]   
-[![Button Documentation]][Documentation]   
-[![Button Build]][Build] 
-
-[![Badge Codacy]][Codacy]   
-[![Badge Crowdin]][Crowdin]   
-[![Badge OpenCollective]][OpenCollective]
-
-<br>
-
-*A Community-led Hyper-Hackable Text Editor,*
-*Forked from [Atom], built on [Electron].*
-
-*Designed to be deeply customizable, but still*
-*approachable using the default configuration.*
-
-
-<br>
-<br>
-
-[![Preview]][#]
+[Website](https://tranquillabs.dev) · [Docs](https://tranquillabs.dev/docs/v0.1.0/overview/introduction) · [Releases](https://github.com/tranquillabs/tranquil-client/releases) · [Discussions](https://github.com/orgs/tranquillabs/discussions)
 
 </div>
 
-<!---------------------------{ Links }--------------------------->
+---
 
-[OpenCollective]: https://opencollective.com/pulsar-edit
-[Discussions]: https://github.com/orgs/pulsar-edit/discussions
-[Electron]: https://github.com/electron/electron
-[Atom]: https://github.blog/2022-06-08-sunsetting-atom/
-[Discord]: https://discord.gg/7aEbB9dGRT 'Join the Pulsar Discord today!'
-[Crowdin]: https://crowdin.pulsar-edit.dev
-[Status]: https://cirrus-ci.com/github/pulsar-edit/pulsar/master
-[Codacy]: https://app.codacy.com/gh/pulsar-edit/pulsar
-[Reddit]: https://www.reddit.com/r/pulsaredit/
-[Mastodon]: https://fosstodon.org/@pulsaredit/
-[Lemmy]: https://lemmy.ml/c/pulsaredit/
+> **Developer preview — not stable.** Tranquil is in early, active development. APIs, interfaces,
+> and behavior are provisional and will change before a stable release. Don't build anything you
+> depend on against it yet.
 
-[#]: #
+## What is Tranquil?
 
+Tranquil Studio is an Electron desktop editor where a real Chromium browser is a first-class
+citizen next to your files: open web apps as editor tabs, save links as `.url` files in your
+project, and drive live pages with plain-JavaScript automations.
 
-<!---------------------------{ Documents }--------------------------->
+## Highlights
 
-[Documentation]: https://pulsar-edit.dev/docs/ 'Information how to use & work with Pulsar.'
-[Install]: https://pulsar-edit.dev/docs/launch-manual/sections/getting-started/#installing-pulsar 'How to install Pulsar on your system.'
-[Build]: https://pulsar-edit.dev/docs/launch-manual/sections/core-hacking/#building-pulsar 'Instructions on how to build Pulsar by yourself.'
+- **Browser** — real sites as splittable editor tabs with a URL bar, history, zoom, DevTools,
+  find-in-page (⌘F), a configurable User-Agent, and a branded start page; snapshot a page to a
+  HAR and replay it offline.
+- **Local URLs** — drag any tab onto the Project Pane (or press ⌘S) to save it as a `.url` file;
+  trash and restore bookmarks; open `.url` files back into the browser.
+- **Windows** — per-window browser sessions (the same site logged in under different accounts per
+  window) and a per-window accent color to tell windows apart.
+- **Project Pane** — semantic file-type icons, folder-count pills, hover rename/delete,
+  ⌥/⌘ drag-to-copy, and undoable file operations.
+- **Automations** — write plain JavaScript and run it against a live browser tab with ⌘⇧R, or
+  register any `.js` file as a named command.
+- **Settings & themes** — a first-class settings tab with a live UI-theme picker, plus refreshed
+  default light and dark themes.
 
-[License]: LICENSE.md
+## Getting started
 
+Download the latest preview from the
+[releases page](https://github.com/tranquillabs/tranquil-client/releases), or build from source —
+the [Local Dev Setup runbook](https://tranquillabs.dev/docs/v0.1.0/development/local-dev-setup)
+clones the sibling packages, wires them together, and launches the app.
 
-<!---------------------------{ Images }--------------------------->
+## The Tranquil toolkit
 
-[Preview]: resources/readme.png 'Preview of the editor.'
+Tranquil Studio (this repo) is one of four pieces:
 
+| Piece | What it is |
+| --- | --- |
+| **Studio** | The desktop editor and automation workspace (this repo). |
+| **Browser** | The embedded Chromium browser — your window onto any web app. |
+| **Engine** | A runtime to package and run automations headlessly (e.g. in CI/CD). |
+| **Automations** | The JavaScript SDK — sequences of steps across your apps, on a schedule or on demand. |
 
-<!---------------------------{ Badges }--------------------------->
+## License
 
-[Badge OpenCollective]: https://opencollective.com/pulsar-edit/tiers/badge.svg
-[Badge Discussions]: https://img.shields.io/github/discussions/pulsar-edit/.github?style=for-the-badge&logo=GitHub&labelColor=50555b&color=35393d
-[Badge Upstream]: https://img.shields.io/badge/Upstream_Status-Sunset-966227.svg?style=for-the-badge&labelColor=c38033
-[Badge Discord]: https://img.shields.io/badge/Discord-4b7494.svg?style=for-the-badge&labelColor=6399c4&logoColor=white&logo=Discord
-[Badge License]: https://img.shields.io/badge/License-MIT-ac7f31.svg?style=for-the-badge&labelColor=e5ab42
-[Badge Crowdin]: https://badges.crowdin.net/pulsar-edit/localized.svg
-[Badge Codacy]: https://app.codacy.com/project/badge/Grade/24873ecb93dc4c1d865202ce5b24efc1
-<!-- Reddit subscribers badge broken. See: https://github.com/badges/shields/issues/9817 & https://github.com/badges/shields/issues/9256 -->
-<!-- [Badge Reddit]: https://img.shields.io/reddit/subreddit-subscribers/pulsaredit?style=for-the-badge&label=Reddit&logoColor=white&logo=Reddit&labelColor=e05d44&color=b14835 -->
-[Badge Reddit]: https://img.shields.io/badge/%2Fr%2Fpulsaredit-e05d44?style=for-the-badge&logo=Reddit&logoColor=white&labelColor=e05d44&color=b14835
-[Badge Status]: https://img.shields.io/cirrus/github/pulsar-edit/pulsar?style=for-the-badge&labelColor=c77b7f&label=Build%20Status&color=8d575a
-[Badge Mastodon]: https://img.shields.io/mastodon/follow/109416671848539153?domain=https%3A%2F%2Ffosstodon.org%2F&style=for-the-badge&logo=Mastodon&logoColor=white&label=Mastodon&labelColor=a0a0d8&color=7c7cc1
-[Badge Lemmy]: https://img.shields.io/lemmy/pulsaredit%40lemmy.ml?style=for-the-badge&logo=Lemmy&logoColor=white&label=Lemmy&labelColor=64ad82&color=1d9b52
+[MIT](LICENSE.md) © Tranquil Labs.
 
-
-<!--------------------------{ Buttons }--------------------------->
-
-[Button Documentation]: https://img.shields.io/badge/Documentation-6399c4?style=for-the-badge&logoColor=white&logo=GitBook
-[Button Install]: https://img.shields.io/badge/Install-78af9f?style=for-the-badge&logoColor=white&logo=DocuSign
-[Button Build]: https://img.shields.io/badge/Building-e5ab42?style=for-the-badge&logoColor=white&logo=GNUBash
+Tranquil is a fork of [Pulsar](https://pulsar-edit.dev), itself a fork of Atom; the original
+copyright notices are retained in [LICENSE.md](LICENSE.md).
