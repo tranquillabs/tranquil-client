@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+const fs = require('fs');
 const path = require('path');
 const { spawn, execFileSync } = require('child_process');
 
@@ -110,12 +111,14 @@ function filterStream(readable, out) {
 // So patch the bundle's plist to "Tranquil" before spawning. Idempotent and
 // best-effort: any failure just leaves the default name rather than blocking the
 // launch. macOS-only; packaged builds already carry the correct name via
-// electron-builder productName.
+// electron-builder productName. Returns true if it changed the plist (so the
+// caller can re-register the bundle with LaunchServices).
 function patchMacAppName(electronBin) {
-  if (process.platform !== 'darwin') return;
+  if (process.platform !== 'darwin') return false;
   // electronBin = .../Electron.app/Contents/MacOS/Electron → Contents/Info.plist
   const plist = path.join(path.dirname(path.dirname(electronBin)), 'Info.plist');
   const NAME = 'Tranquil';
+  let changed = false;
   for (const key of ['CFBundleName', 'CFBundleDisplayName']) {
     try {
       const current = execFileSync(
@@ -129,17 +132,116 @@ function patchMacAppName(electronBin) {
           `Set :${key} ${NAME}`,
           plist,
         ]);
+        changed = true;
       }
     } catch {
       // Key missing or PlistBuddy unavailable — skip; the app still launches.
     }
+  }
+  return changed;
+}
+
+// Same story for the dock / app-switcher icon: in dev the running bundle is the
+// stock Electron.app, whose CFBundleIconFile points at Electron's default atom
+// icon. There is no BrowserWindow-level override on macOS (the OS takes the app
+// icon from the bundle plist, not the window), so brand it by dropping our
+// tranquil.icns into the bundle's Resources and repointing CFBundleIconFile at
+// it — the exact same runtime-bundle patch mechanism patchMacAppName() uses.
+// macOS-only, best-effort, idempotent: any failure just leaves the default icon.
+// Packaged builds carry the real icon via electron-builder, so this is dev-only.
+function patchMacAppIcon(electronBin) {
+  if (process.platform !== 'darwin') return false;
+  try {
+    // electronBin = .../Electron.app/Contents/MacOS/Electron
+    const contents = path.dirname(path.dirname(electronBin));
+    const appBundle = path.dirname(contents);
+    const plist = path.join(contents, 'Info.plist');
+    const ICON = 'tranquil'; // CFBundleIconFile value, extension-less
+    const src = path.join(__dirname, '..', 'resources', 'app-icons', `${ICON}.icns`);
+    const dest = path.join(contents, 'Resources', `${ICON}.icns`);
+    if (!fs.existsSync(src)) return false;
+
+    // Copy only when missing or changed, so a normal relaunch does no work and
+    // doesn't needlessly bump the bundle mtime.
+    let iconChanged = true;
+    if (fs.existsSync(dest)) {
+      iconChanged = !fs.readFileSync(src).equals(fs.readFileSync(dest));
+    }
+    if (iconChanged) fs.copyFileSync(src, dest);
+
+    // Point the bundle at our icon. Set if the key exists, otherwise Add it.
+    let plistChanged = false;
+    let current = null;
+    try {
+      current = execFileSync(
+        '/usr/libexec/PlistBuddy',
+        ['-c', 'Print :CFBundleIconFile', plist],
+        { encoding: 'utf8' }
+      ).trim();
+    } catch {
+      current = null; // key absent
+    }
+    if (current === null) {
+      execFileSync('/usr/libexec/PlistBuddy', [
+        '-c',
+        `Add :CFBundleIconFile string ${ICON}`,
+        plist,
+      ]);
+      plistChanged = true;
+    } else if (current !== ICON) {
+      execFileSync('/usr/libexec/PlistBuddy', [
+        '-c',
+        `Set :CFBundleIconFile ${ICON}`,
+        plist,
+      ]);
+      plistChanged = true;
+    }
+
+    // macOS's icon-services cache is keyed on the bundle's mtime; bump it so a
+    // freshly-patched bundle shows the new icon instead of a stale cached one.
+    // (If the Dock still shows the old icon, `killall Dock` forces a refresh.)
+    const changed = iconChanged || plistChanged;
+    if (changed) {
+      const now = new Date();
+      try { fs.utimesSync(appBundle, now, now); } catch {}
+    }
+    return changed;
+  } catch {
+    // Anything unexpected (PlistBuddy missing, permissions) — skip; the app
+    // still launches with the default icon.
+    return false;
+  }
+}
+
+// After patching the bundle's plist (name and/or icon), the Dock's hover
+// tooltip can still show the OLD name because LaunchServices caches the app's
+// display name in its own database, keyed independently of the icon cache. Force
+// LaunchServices to re-read the bundle so the next launch's dock tile reflects
+// the patched CFBundleName. Best-effort and macOS-only; only worth doing when a
+// patch actually changed the bundle. `lsregister` lives at a fixed path inside
+// the (private) LaunchServices framework.
+function reregisterMacBundle(electronBin) {
+  if (process.platform !== 'darwin') return;
+  const appBundle = path.dirname(path.dirname(path.dirname(electronBin)));
+  const lsregister =
+    '/System/Library/Frameworks/CoreServices.framework/Frameworks/' +
+    'LaunchServices.framework/Support/lsregister';
+  try {
+    execFileSync(lsregister, ['-f', appBundle]);
+  } catch {
+    // lsregister missing/moved or the call failed — skip; the app still
+    // launches, the dock tooltip just keeps its stale cached name.
   }
 }
 
 function main() {
   const electronBin = require('electron');
 
-  patchMacAppName(electronBin);
+  const nameChanged = patchMacAppName(electronBin);
+  const iconChanged = patchMacAppIcon(electronBin);
+  // Only re-register when we actually touched the bundle — LaunchServices
+  // otherwise keeps a stale "Electron" tooltip on the dock tile.
+  if (nameChanged || iconChanged) reregisterMacBundle(electronBin);
 
   const childEnv = { ...process.env };
   // An agent/IDE shell (e.g. the VSCode extension host) may export

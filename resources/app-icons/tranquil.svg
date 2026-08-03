@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Tranquil node-graph app icon. Source: www-tranquil/static/favicon.svg,
+       with the oklch() colors resolved to sRGB hex so SVG rasterizers
+       (rsvg-convert etc.) render them correctly:
+         accent oklch(0.8 0.17 145)   -> #6fda75
+         plate  oklch(0.17 0.012 240) -> #0b1014 -->
+  <rect width="32" height="32" rx="5" fill="#0b1014"/>
+  <g transform="translate(16 16) scale(0.82) translate(-16 -16)" stroke="#6fda75" fill="none">
+    <!-- ascender + descender rails -->
+    <path d="M2 5 H30" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M2 27 H30" stroke-width="2.6" stroke-linecap="round"/>
+    <!-- node -->
+    <rect x="10" y="11" width="12" height="10" rx="3" stroke-width="3"/>
+    <!-- ports: two in, one out -->
+    <path d="M2 14 H10" stroke-width="3" stroke-linecap="round"/>
+    <path d="M2 18 H10" stroke-width="3" stroke-linecap="round"/>
+    <path d="M22 16 H30" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>
