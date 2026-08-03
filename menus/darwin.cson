@@ -34,7 +34,7 @@
     submenu: [
       { label: 'New Window', command: 'application:new-window' }
       { label: 'New File', command: 'application:new-file' }
-      { label: 'New Folder', command: 'tree-view:add-folder', accelerator: 'Shift+A' }
+      { label: 'New Folder', command: 'tree-view:add-folder' }
       { label: 'Open…', command: 'application:open' }
       { label: 'Add Project Folder…', command: 'application:add-project-folder' }
       {
