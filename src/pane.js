@@ -808,7 +808,21 @@ module.exports = class Pane {
   // * `index` {Number} indicating the index to which to move the item in the
   //   given pane.
   moveItemToPane(item, pane, index) {
+    // A `moved` add/remove skips the per-container ItemRegistry bookkeeping,
+    // which is correct within one container but desyncs the registries when the
+    // item crosses containers (center ⇄ docks): the source stale-holds the item
+    // and the destination never registers it, so a later genuine add throws
+    // "The workspace can only contain one instance of item". Transfer the
+    // registration explicitly. hasItem guards an already-desynced session.
+    const fromContainer = this.container;
+    const toContainer = pane.getContainer();
     this.removeItem(item, true);
+    if (fromContainer && toContainer && fromContainer !== toContainer) {
+      fromContainer.itemRegistry.removeItem(item);
+      if (!toContainer.itemRegistry.hasItem(item)) {
+        toContainer.itemRegistry.addItem(item);
+      }
+    }
     return pane.addItem(item, { index, moved: true });
   }
 
