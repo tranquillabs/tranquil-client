@@ -8,6 +8,7 @@ const {
   globalShortcut,
   dialog,
   session,
+  net,
 } = require('electron');
 const path = require('path');
 const { registerHarIpc } = require('./har.js');
@@ -34,9 +35,78 @@ const stripAppUaTokens = (ua) =>
     new RegExp(` (?:${escapeRegExp(app.getName())}|Electron)\\/\\S+`, 'g'),
     ''
   );
-let currentUserAgent = stripAppUaTokens(app.userAgentFallback);
+// Seed with the Chrome version token pinned to a current release, mirroring the
+// renderer's CLEAN_USER_AGENT (tranquil-browser/lib/utils.js) — the bundled
+// Chromium's frozen version reads as an outdated browser to bot heuristics. The
+// renderer's first 'set-user-agent' push replaces this anyway.
+let currentUserAgent = stripAppUaTokens(app.userAgentFallback).replace(
+  /Chrome\/[\d.]+/,
+  'Chrome/139.0.0.0'
+);
 ipcMain.on('set-user-agent', (event, ua) => {
   if (typeof ua === 'string' && ua.trim()) currentUserAgent = ua.trim();
+});
+
+// Latest stable Chrome/Firefox versions, fetched on demand from the vendors'
+// official version endpoints — only when the user clicks "Check Current
+// Versions" in the Tranquil settings tab (tranquil-config), never
+// automatically. Runs here so the requests use net.fetch (proxy-aware, no page
+// CORS). Returns tokens in the shape real browsers advertise: Chrome froze its
+// minor as 0.0.0, Firefox reports major.0.
+ipcMain.handle('fetch-browser-versions', async () => {
+  // The `releases` endpoint (vs plain `versions`) includes serving.startTime —
+  // when the build started rolling out — which the settings tab shows and uses
+  // for its staleness hint. Firefox's payload carries its release dates (and
+  // the scheduled NEXT_RELEASE_DATE) alongside the version.
+  const [chromeRes, firefoxRes] = await Promise.all([
+    net.fetch(
+      'https://versionhistory.googleapis.com/v1/chrome/platforms/mac/channels/stable/versions/all/releases?pageSize=1'
+    ),
+    net.fetch('https://product-details.mozilla.org/1.0/firefox_versions.json'),
+  ]);
+  if (!chromeRes.ok || !firefoxRes.ok) {
+    throw new Error(
+      `version endpoints returned ${chromeRes.status} / ${firefoxRes.status}`
+    );
+  }
+  const chromeJson = await chromeRes.json();
+  const firefoxJson = await firefoxRes.json();
+  const chromeRelease =
+    (chromeJson.releases && chromeJson.releases[0]) || {};
+  const chromeMajor = String(chromeRelease.version || '').split('.')[0];
+  const firefoxMajor = String(firefoxJson.LATEST_FIREFOX_VERSION || '').split('.')[0];
+  if (!/^\d+$/.test(chromeMajor) || !/^\d+$/.test(firefoxMajor)) {
+    throw new Error('unexpected version endpoint response shape');
+  }
+  return {
+    chrome: `${chromeMajor}.0.0.0`,
+    chromeReleased: String(
+      (chromeRelease.serving && chromeRelease.serving.startTime) || ''
+    ).slice(0, 10),
+    firefox: `${firefoxMajor}.0`,
+    firefoxReleased: firefoxJson.LAST_RELEASE_DATE || '',
+    firefoxNextRelease: firefoxJson.NEXT_RELEASE_DATE || '',
+  };
+});
+
+// Clear the cookies a browser guest's current site can see (the "Clear Cookies"
+// pane-control button in tranquil-automations). Scoped to the tab's session
+// partition and to cookies that would be sent to `url` — including parent-domain
+// cookies (.example.com) — so the rest of the window session's logins survive.
+ipcMain.handle('clear-site-cookies', async (event, { partition, url }) => {
+  const ses = partition
+    ? session.fromPartition(partition)
+    : session.defaultSession;
+  const cookies = await ses.cookies.get({ url });
+  await Promise.all(
+    cookies.map((cookie) =>
+      ses.cookies.remove(
+        `http${cookie.secure ? 's' : ''}://${cookie.domain.replace(/^\./, '')}${cookie.path}`,
+        cookie.name
+      )
+    )
+  );
+  return cookies.length;
 });
 // Rewrite the User-Agent header once per guest session (WeakSet-guarded so shared
 // per-window partitions aren't re-bound). The closure reads the live currentUserAgent.
