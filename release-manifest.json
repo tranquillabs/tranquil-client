@@ -1,30 +1,30 @@
 {
-  "release": "v0.1.0",
-  "date": "2026-07-29",
+  "release": "v0.1.1",
+  "date": "2026-08-11",
   "packages": {
     "tranquil-automations": {
-      "version": "0.1.0",
-      "sha": "4f6ed6bd5cb78b2231b6e6be30bae72592520f7d"
+      "version": "0.1.1",
+      "sha": "ec73fca0bc313a94b10118529b05adb81d3fcf5f"
     },
     "tranquil-browser": {
-      "version": "0.1.0",
-      "sha": "922097ea8b03c58be465d357a665580d946cd6ac"
+      "version": "0.1.1",
+      "sha": "f128f6089820d841f32f95eeb8cbac6ae0bdcef1"
     },
     "tranquil-business-dark": {
-      "version": "0.1.0",
-      "sha": "33c465cde11c21ecaba8d85abce378f27e7b4728"
+      "version": "0.1.1",
+      "sha": "32c0c7af5a13de400cf1792f510d86c409a20da0"
     },
     "tranquil-business-light": {
-      "version": "0.1.0",
-      "sha": "cdf208109304d1c3f55c917557ec9aaa81f494e0"
+      "version": "0.1.1",
+      "sha": "40fb48600ce3aec0d3a4040aee144e8d7ae83b95"
     },
     "tranquil-config": {
-      "version": "0.1.0",
-      "sha": "6fa961c08476ec86fc2c235e9f04f869760f0d39"
+      "version": "0.1.1",
+      "sha": "bab856410c70f2158a6c280260dfe3a5c891c071"
     },
     "tranquil-drag-drop": {
-      "version": "0.1.0",
-      "sha": "82abe709a8240dddacaf93141ce9ddc8c78975bd"
+      "version": "0.1.1",
+      "sha": "415cd60492426e8418843983380926a767304ce5"
     },
     "tranquil-examples": {
       "version": "0.1.0",
@@ -39,8 +39,8 @@
       "sha": "42f03dc276c1bef972ceba8bf9d1e794ccca4f91"
     },
     "tranquil-tips": {
-      "version": "0.1.0",
-      "sha": "3e0deca4867b83c907c807a05c2fcfe32ac0351c"
+      "version": "0.1.1",
+      "sha": "8f50fe5c08fbf4e9f2375504fb94fa82c099b4f4"
     },
     "tranquil-window-color": {
       "version": "0.1.0",
