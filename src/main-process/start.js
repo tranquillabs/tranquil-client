@@ -37,7 +37,12 @@ module.exports = function start(resourcePath, devResourcePath, startTime) {
   });
 
   app.commandLine.appendSwitch('enable-experimental-web-platform-features');
-  app.commandLine.appendSwitch('remote-debugging-port', '9222');
+  // TRANQUIL_CDP_PORT lets a second instance (e.g. the smoke-test harness) use its own CDP
+  // port instead of contending for :9222 with a running dev instance.
+  app.commandLine.appendSwitch(
+    'remote-debugging-port',
+    process.env.TRANQUIL_CDP_PORT || '9222'
+  );
 
   const args = parseCommandLine(process.argv.slice(1));
 
