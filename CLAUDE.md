@@ -38,6 +38,7 @@ Tranquil's own packages live in separate repos, cloned as siblings of `tranquil-
 | `tranquil-automations` | `tranquillabs/tranquil-automations` | `../tranquil-automations` |
 | `tranquil-browser` | `tranquillabs/tranquil-browser` | `../tranquil-browser` |
 | `tranquil-config` | `tranquillabs/tranquil-config` | `../tranquil-config` |
+| `tranquil-debug` | `tranquillabs/tranquil-debug` | `../tranquil-debug` |
 | `tranquil-theme-icons` | `tranquillabs/tranquil-theme-icons` | `../tranquil-theme-icons` |
 | `tranquil-tips` | `tranquillabs/tranquil-tips` | `../tranquil-tips` |
 
@@ -56,6 +57,7 @@ Owned packages are linked via `link:../` in `package.json` so changes in sibling
 - `"tranquil-automations": "link:../tranquil-automations"`
 - `"tranquil-browser": "link:../tranquil-browser"`
 - `"tranquil-config": "link:../tranquil-config"`
+- `"tranquil-debug": "link:../tranquil-debug"`
 - `"tranquil-theme-icons": "link:../tranquil-theme-icons"`
 - `"tranquil-tips": "link:../tranquil-tips"`
 
@@ -68,6 +70,7 @@ cd /Users/david/Documents/Tranquil/Repos
 git clone https://github.com/tranquillabs/tranquil-automations.git
 git clone https://github.com/tranquillabs/tranquil-browser.git
 git clone https://github.com/tranquillabs/tranquil-config.git
+git clone https://github.com/tranquillabs/tranquil-debug.git
 git clone https://github.com/tranquillabs/tranquil-theme-icons.git
 git clone https://github.com/tranquillabs/tranquil-tips.git
 git clone https://github.com/tranquillabs/tranquil-examples.git
@@ -85,6 +88,7 @@ mkdir -p ~/.tranquil/dev/packages
 ln -s /Users/david/Documents/Tranquil/Repos/tranquil-automations ~/.tranquil/dev/packages/tranquil-automations
 ln -s /Users/david/Documents/Tranquil/Repos/tranquil-browser ~/.tranquil/dev/packages/tranquil-browser
 ln -s /Users/david/Documents/Tranquil/Repos/tranquil-config ~/.tranquil/dev/packages/tranquil-config
+ln -s /Users/david/Documents/Tranquil/Repos/tranquil-debug ~/.tranquil/dev/packages/tranquil-debug
 ln -s /Users/david/Documents/Tranquil/Repos/tranquil-theme-icons ~/.tranquil/dev/packages/tranquil-theme-icons
 ln -s /Users/david/Documents/Tranquil/Repos/tranquil-tips ~/.tranquil/dev/packages/tranquil-tips
 ```
