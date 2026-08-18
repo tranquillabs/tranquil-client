@@ -73,7 +73,6 @@ git clone https://github.com/tranquillabs/tranquil-config.git
 git clone https://github.com/tranquillabs/tranquil-debug.git
 git clone https://github.com/tranquillabs/tranquil-theme-icons.git
 git clone https://github.com/tranquillabs/tranquil-tips.git
-git clone https://github.com/tranquillabs/tranquil-examples.git
 cd tranquil-client
 source ~/.nvm/nvm.sh && nvm use
 yarn install
@@ -95,7 +94,7 @@ ln -s /Users/david/Documents/Tranquil/Repos/tranquil-tips ~/.tranquil/dev/packag
 
 This is the idiomatic Pulsar approach: packages found in `dev/packages/` are discovered before `packageDependencies` and get `isBundled: false`, so they appear as dev packages rather than core. In production builds the symlinks won't exist and the packages load from `node_modules` as bundled.
 
-**`tranquil-examples` is content-only** (the guided sample project, seeded to `~/.tranquil/examples` on first run). It is **not** a loadable package — do **not** symlink it into `dev/packages/`. It only needs the `link:../tranquil-examples` dependency (already in `package.json`), so `yarn install` links it into `node_modules` where the app's first-run seeder copies from it. While iterating on the sample content, run `yarn reseed-examples` to overwrite `~/.tranquil/examples` with the latest from the repo (the first-run seed is non-destructive, so it won't refresh on its own).
+**`tranquil-examples` is not part of the app.** It is a standalone repo of runnable examples that users clone and open as a project — no dependency, no seeding, no menu item. Do not add it back to `package.json` or `dev/packages/`.
 
 ## Dev Startup
 

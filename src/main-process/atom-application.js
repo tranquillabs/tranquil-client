@@ -325,24 +325,8 @@ module.exports = class AtomApplication extends EventEmitter {
       ];
     }
 
-    // First run: a fresh install that seeded the example project opens it as the
-    // default window (with the Welcome doc). In production nothing else is queued
-    // here, so it fills the empty window. In dev the app's own `.` positional
-    // (`electron .`) queues tranquil-client's own source; on a fresh install we
-    // supersede that so first run lands in the guide, not the app's tree. Normal
-    // dev and existing users (no `defaultProjectPath`) are unaffected.
-    const firstRunWindow =
-      this.defaultProjectPath && fs.existsSync(this.defaultProjectPath)
-        ? this.firstRunWindowOptions(options)
-        : null;
-
     if (optionsForWindowsToOpen.length === 0) {
-      optionsForWindowsToOpen.push(firstRunWindow || options);
-    } else if (
-      firstRunWindow &&
-      this.onlyOpensResourcePath(optionsForWindowsToOpen)
-    ) {
-      optionsForWindowsToOpen = [firstRunWindow];
+      optionsForWindowsToOpen.push(options);
     }
 
     // Preserve window opening order
@@ -949,24 +933,6 @@ module.exports = class AtomApplication extends EventEmitter {
       })
     );
 
-    // "File → New Default Window" (tranquil-config): seed the example project if
-    // it isn't there yet (non-destructive) and open it + the Welcome doc in a new
-    // window. Uses classic Electron IPC (renderer→main) — window creation is a
-    // main-process concern, not a guest capability (see ADR: Electron IPC vs
-    // Guest↔Host RPC).
-    this.disposable.add(
-      ipcHelpers.on(ipcMain, 'tranquil:new-default-window', () => {
-        const target = this.seedExampleProject(process.env.ATOM_HOME);
-        if (!target) return;
-        const welcome = path.join(target, '00-Welcome.md');
-        this.openPaths({
-          foldersToOpen: [target],
-          pathsToOpen: fs.existsSync(welcome) ? [welcome] : [],
-          newWindow: true
-        });
-      })
-    );
-
     this.disposable.add(
       ipcHelpers.on(ipcMain, 'window-command', (event, command, ...args) => {
         const window = BrowserWindow.fromWebContents(event.sender);
@@ -1126,90 +1092,7 @@ module.exports = class AtomApplication extends EventEmitter {
     if (!fs.existsSync(configDirPath)) {
       const templateConfigDirPath = fs.resolve(this.resourcePath, 'dot-atom');
       fs.copySync(templateConfigDirPath, configDirPath);
-      // Fresh install → seed the bundled example project and remember it as the
-      // first-run project to open (see launch()). Only set on a genuine fresh
-      // install; existing users are never seeded on startup.
-      this.defaultProjectPath = this.seedExampleProject(configDirPath);
     }
-  }
-
-  // Tranquil: seed the bundled `tranquil-examples` sample project into the user's
-  // config dir as `<configDir>/examples` (the first-run / "New Default Window"
-  // project). Idempotent and non-destructive: if the target already exists it is
-  // reused as-is so a user's edits are never clobbered. Returns the target path,
-  // or null if the bundle is absent (e.g. a dev checkout without the sibling
-  // clone) or the copy produced nothing — callers treat null as "no project".
-  seedExampleProject(configDirPath) {
-    try {
-      const source = path.join(
-        this.resourcePath,
-        'node_modules',
-        'tranquil-examples'
-      );
-      if (!fs.existsSync(source)) return null;
-
-      const target = path.join(configDirPath, 'examples');
-      if (fs.existsSync(target)) return target;
-
-      // Copy each top-level entry except packaging/VCS metadata. Per-entry copy
-      // follows the dev `node_modules` symlink and copies real content (rather
-      // than reproducing the source as a symlink at the target). fs-plus splits
-      // its copy API by type — `copySync` is directory-only (it reads the source
-      // as a dir), so files must go through `copyFileSync`.
-      const skip = new Set([
-        'package.json',
-        'node_modules',
-        '.git',
-        '.gitignore',
-        '.DS_Store'
-      ]);
-      for (const entry of fs.readdirSync(source)) {
-        if (skip.has(entry)) continue;
-        const from = path.join(source, entry);
-        const to = path.join(target, entry);
-        if (fs.isDirectorySync(from)) {
-          fs.copySync(from, to);
-        } else {
-          fs.copyFileSync(from, to);
-        }
-      }
-      return fs.existsSync(target) ? target : null;
-    } catch (error) {
-      console.warn(`Failed to seed example project: ${error.message}`);
-      return null;
-    }
-  }
-
-  // Window options for the first-run window: open the seeded example project as
-  // the project root and auto-open its Welcome doc (if present).
-  firstRunWindowOptions(options) {
-    const welcome = path.join(this.defaultProjectPath, '00-Welcome.md');
-    return {
-      ...options,
-      foldersToOpen: [this.defaultProjectPath],
-      pathsToOpen: fs.existsSync(welcome) ? [welcome] : []
-    };
-  }
-
-  // True when every queued window opens nothing but this app's own resource path
-  // — i.e. the dev-only `.` positional from `electron .`. Used so a fresh-install
-  // launch opens the example project instead of tranquil-client's own source in
-  // dev. Returns false in production (no such positional) and whenever any real
-  // path is queued.
-  onlyOpensResourcePath(optionsForWindowsToOpen) {
-    if (!this.resourcePath) return false;
-    const resource = path.normalize(this.resourcePath);
-    return optionsForWindowsToOpen.every(opts => {
-      const paths = [
-        ...(opts.pathsToOpen || []),
-        ...(opts.foldersToOpen || [])
-      ];
-      if (paths.length === 0) return false;
-      const from = opts.executedFrom || process.cwd();
-      return paths.every(
-        p => path.normalize(path.resolve(from, p)) === resource
-      );
-    });
   }
 
   // Public: Executes the given command.
