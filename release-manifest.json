@@ -1,46 +1,46 @@
 {
-  "release": "v0.1.1",
-  "date": "2026-08-11",
+  "release": "v0.2.0",
+  "date": "2026-08-17",
   "packages": {
     "tranquil-automations": {
-      "version": "0.1.1",
-      "sha": "ec73fca0bc313a94b10118529b05adb81d3fcf5f"
+      "version": "0.2.0",
+      "sha": "9279f9987c7feff856aa0c68cf3b77dc615df5b6"
     },
     "tranquil-browser": {
-      "version": "0.1.1",
-      "sha": "f128f6089820d841f32f95eeb8cbac6ae0bdcef1"
+      "version": "0.1.2",
+      "sha": "5bde19787588090c9fd105c54a9789b293bfef63"
     },
     "tranquil-business-dark": {
-      "version": "0.1.1",
-      "sha": "32c0c7af5a13de400cf1792f510d86c409a20da0"
+      "version": "0.1.2",
+      "sha": "c8ff8bb9a7d5290c7b133161c992c427a721a7d2"
     },
     "tranquil-business-light": {
-      "version": "0.1.1",
-      "sha": "40fb48600ce3aec0d3a4040aee144e8d7ae83b95"
+      "version": "0.1.2",
+      "sha": "531d674408cb2151afdcd4b7c6486b31de0da7a6"
     },
     "tranquil-config": {
+      "version": "0.2.0",
+      "sha": "c29fc1d42fda45c419722b72f5e7411d6bb22d39"
+    },
+    "tranquil-debug": {
       "version": "0.1.1",
-      "sha": "bab856410c70f2158a6c280260dfe3a5c891c071"
+      "sha": "b0c251135f9b44dfce4077f6da13c0d4b5a2a22d"
     },
     "tranquil-drag-drop": {
       "version": "0.1.1",
       "sha": "415cd60492426e8418843983380926a767304ce5"
     },
-    "tranquil-examples": {
-      "version": "0.1.0",
-      "sha": "f05fc4748634e226c98b70b4a8a7177706b9892d"
-    },
     "tranquil-rpc": {
-      "version": "0.1.0",
-      "sha": "af9a087f18cb51546eceac5ed6e5996d56967457"
+      "version": "0.2.0",
+      "sha": "a8b9a37d55abb8a6f4ac0480122890f3433f4caa"
     },
     "tranquil-theme-icons": {
       "version": "0.1.0",
       "sha": "42f03dc276c1bef972ceba8bf9d1e794ccca4f91"
     },
     "tranquil-tips": {
-      "version": "0.1.1",
-      "sha": "8f50fe5c08fbf4e9f2375504fb94fa82c099b4f4"
+      "version": "0.1.2",
+      "sha": "2b234e0709632777b566a8470eaab3df1d53e78e"
     },
     "tranquil-window-color": {
       "version": "0.1.0",
