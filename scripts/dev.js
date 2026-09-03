@@ -28,24 +28,53 @@ const CONSOLE_SOURCE = /, source: (\S+)/;
 // Explicit content patterns to drop, tested against a fully-assembled console
 // record (message + source, joined). Add narrow RegExps here for one-off
 // console noise the structural rules below don't already cover.
-const LOG_FILTERS = [
-  // A Blink CSS deprecation Chromium injects into our renderer (cites one of our
-  // files as source, so the "local source ⇒ keep" rule wouldn't catch it).
-  /searchfield-cancel-button.*deprecated/,
-];
+const LOG_FILTERS = [];
 
-// Decide whether a fully-assembled console record should be shown. Drops
-// Electron's own injected dev warnings (source `node:electron/…`: the CSP /
-// Node-integration security warnings, `vm` deprecation, …), remote-page console
-// (non-local http origin — third-party cookies, a site's CORS failures, unused
-// font preloads), and anything a LOG_FILTERS pattern matches. Keeps console from
-// local sources (our own code, e.g. tranquil-rpc) and localhost dev servers
-// (browser-sync app-template / automations).
+// Our own log lines carry a `[tranquil-*]` tag. Matched against the whole record
+// so they survive every structural rule below — including any future tightening.
+const TRANQUIL_TAG = /\[tranquil[\w-]*\]/;
+
+// Blink reports every failed subresource this way: a site's 404s and blocked
+// requests, a dropped dev-server connection, a webview losing the network. The app
+// embeds a full browser, so this is unbounded third-party noise by construction —
+// there is no version of it we act on.
+const RESOURCE_LOAD_FAILURE = /Failed to load resource:/;
+
+// A `node_modules/` path means a dependency we don't own and can't fix (marked's
+// deprecation notices via markdown-preview, xterm's WebGL timing warnings). Owned
+// packages are linked from sibling repos and resolve to real paths outside
+// node_modules, so they're unaffected.
+const NODE_MODULES = /[\\/]node_modules[\\/]/;
+
+// Decide whether a fully-assembled console record should be shown. This is an
+// allowlist: a record has to come from code we actually maintain. In precedence
+// order it drops anything a LOG_FILTERS pattern matches (the explicit escape
+// hatch), keeps anything carrying our own `[tranquil-*]` tag, then drops by
+// structure — resource-load failures, Electron's injected dev warnings (source
+// `node:electron/…`: the CSP / Node-integration security warnings, `vm`
+// deprecation), remote-page console, dependencies under `node_modules/`, and
+// anything addressed by a URL scheme other than http(s). What survives is console
+// from our own absolute filesystem paths and from localhost dev servers (the
+// app-template / ops-demo pages).
+//
+// Our code always reports a bare absolute path as its source, never a scheme, so
+// the last rule costs us nothing and covers every browser-internal surface at
+// once: `file://` (Blink warnings attributed to the window shell rather than to a
+// script — third-party cookie notices and the like), `devtools://` (DevTools'
+// own internal errors), `chrome-error://`, extensions, `blob:`, `data:`.
 function keepConsoleRecord(record) {
   if (LOG_FILTERS.some((re) => re.test(record))) return false;
+  if (TRANQUIL_TAG.test(record)) return true;
+  if (RESOURCE_LOAD_FAILURE.test(record)) return false;
   const source = (record.match(CONSOLE_SOURCE) || [])[1] || '';
   if (source.startsWith('node:electron')) return false;
-  if (/^https?:\/\/(?!localhost|127\.0\.0\.1)/.test(source)) return false;
+  if (NODE_MODULES.test(source)) return false;
+  // Adjudicate http(s) first — localhost dev servers are the one remote-ish
+  // source worth keeping — then drop every other scheme wholesale.
+  if (/^https?:\/\//.test(source)) {
+    return !/^https?:\/\/(?!localhost|127\.0\.0\.1)/.test(source);
+  }
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(source)) return false;
   return true;
 }
 

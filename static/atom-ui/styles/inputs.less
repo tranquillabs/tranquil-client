@@ -285,9 +285,10 @@ input.input-toggle {
 
 .input-search {
   .input-block-mixin();
-  &&::-webkit-search-cancel-button {
-    -webkit-appearance: searchfield-cancel-button;
-  }
+  // No ::-webkit-search-cancel-button rule here: it used to re-assert
+  // `-webkit-appearance: searchfield-cancel-button`, but Chromium removed that
+  // keyword, so the declaration became inert and only emitted a deprecation
+  // warning on every window load. The UA default already draws the cancel button.
 
   & when (@use-custom-controls) {
     .input-field-mixin();

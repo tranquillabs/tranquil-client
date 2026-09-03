@@ -9,14 +9,20 @@ const {
   dialog,
   session,
   net,
+  powerMonitor,
 } = require('electron');
 const path = require('path');
 const { registerHarIpc } = require('./har.js');
 const { manageBrowserColorScheme } = require('./tb-color-scheme.js');
+const { startStallWatchdog } = require('./stall-watchdog.js');
 
 // HAR capture (hidden-window DevTools Protocol recording) + offline replay
 // (per-archive session interception) for the Tranquil browser. See har.js.
 registerHarIpc({ ipcMain, session, dialog, BrowserWindow, app });
+
+// Freeze diagnostics: main-process event-loop lag, per-window renderer hangs, and sleep/wake
+// markers to tell the two apart. Reports only — see stall-watchdog.js.
+startStallWatchdog({ app, BrowserWindow, powerMonitor });
 
 // Uncomment this to test the updater in dev mode
 // Object.defineProperty(app, 'isPackaged', {
