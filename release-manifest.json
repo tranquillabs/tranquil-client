@@ -1,26 +1,26 @@
 {
-  "release": "v0.2.0",
-  "date": "2026-08-17",
+  "release": "v0.2.1",
+  "date": "2026-09-07",
   "packages": {
     "tranquil-automations": {
-      "version": "0.2.0",
-      "sha": "9279f9987c7feff856aa0c68cf3b77dc615df5b6"
+      "version": "0.2.1",
+      "sha": "3847aec5efb2d92d80dfce270f5d34dc7febefb5"
     },
     "tranquil-browser": {
       "version": "0.1.2",
-      "sha": "5bde19787588090c9fd105c54a9789b293bfef63"
+      "sha": "53d2d8710cf69e2ae2b61150c7f9586fbcce338f"
     },
     "tranquil-business-dark": {
       "version": "0.1.2",
-      "sha": "c8ff8bb9a7d5290c7b133161c992c427a721a7d2"
+      "sha": "b058425998d44c052e89e03c3d99a6970723daa9"
     },
     "tranquil-business-light": {
       "version": "0.1.2",
-      "sha": "531d674408cb2151afdcd4b7c6486b31de0da7a6"
+      "sha": "a98abfcc597dde85c6be132cdbb832feb5b7e7e1"
     },
     "tranquil-config": {
       "version": "0.2.0",
-      "sha": "c29fc1d42fda45c419722b72f5e7411d6bb22d39"
+      "sha": "a10cfc72f42a73600b8f750a6b088f37a6259e46"
     },
     "tranquil-debug": {
       "version": "0.1.1",
@@ -32,7 +32,7 @@
     },
     "tranquil-rpc": {
       "version": "0.2.0",
-      "sha": "a8b9a37d55abb8a6f4ac0480122890f3433f4caa"
+      "sha": "ad9ca6fd3f42a43e93a69b6ac3e02072b60982c9"
     },
     "tranquil-theme-icons": {
       "version": "0.1.0",
