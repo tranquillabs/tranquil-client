@@ -63,6 +63,16 @@ Owned packages are linked via `link:../` in `package.json` so changes in sibling
 
 ## Dev Setup (First Time)
 
+**Deno is required**, alongside Node/nvm and Yarn 1. Automations run as Deno subprocesses
+(ADR-0022), so without it the app launches normally but no automation runs — and `tranquil-test-suite`
+is Deno-only. No binary is bundled yet: the app resolves one from the `tranquil-automations.denoPath`
+setting, then `PATH`, then `~/.deno/bin/deno`, `/opt/homebrew/bin/deno`, `/usr/local/bin/deno`.
+
+```sh
+curl -fsSL https://deno.land/install.sh | sh   # lands at ~/.deno/bin/deno
+deno --version
+```
+
 Clone all owned repos alongside `tranquil-client` in the same parent directory:
 
 ```sh
