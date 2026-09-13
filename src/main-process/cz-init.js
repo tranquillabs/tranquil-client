@@ -10,6 +10,7 @@ const {
   session,
   net,
   powerMonitor,
+  webContents,
 } = require('electron');
 const path = require('path');
 const { registerHarIpc } = require('./har.js');
@@ -156,6 +157,17 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
         );
       }
       return { action: 'deny' };
+    });
+
+    // A page's own `beforeunload` handler can cancel its unload — and unlike a
+    // BrowserWindow tab, Tranquil shows no "leave site?" confirmation for a
+    // guest webview, so a cancelled unload just silently blocks cmd-w with no
+    // visible feedback (reads as "closing sometimes does nothing" or "closing
+    // is slow" when the handler itself does non-trivial work before deciding).
+    // Always allow the close: a closed browser tab isn't a real "you'll lose
+    // unsaved work" situation the way closing an editor is.
+    webContents.on('will-prevent-unload', (event) => {
+      event.preventDefault();
     });
   }
 
@@ -307,6 +319,21 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
     },
     false
   );
+});
+
+// Fallback for a browser tab whose guest won't close gracefully — a page
+// stuck in heavy/blocking synchronous JS (not `beforeunload`; that's handled
+// above via `will-prevent-unload`) can leave its renderer unresponsive to the
+// teardown Electron sends when the <webview> is detached. The renderer sends
+// this after giving the normal close a grace period (see
+// tranquil-browser-view.js); if the webContents still exists by then, kill
+// its process outright so the tab actually closes. Harmless no-op if it
+// already tore down cleanly in the meantime.
+ipcMain.on('force-close-webview', (event, webContentsId) => {
+  const guest = webContents.fromId(webContentsId);
+  if (guest && !guest.isDestroyed()) {
+    guest.forcefullyCrashRenderer();
+  }
 });
 
 ipcMain.on('open-link-in-new-tab', (event, arg) => {
