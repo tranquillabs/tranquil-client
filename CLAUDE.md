@@ -42,6 +42,20 @@ Tranquil's own packages live in separate repos, cloned as siblings of `tranquil-
 | `tranquil-theme-icons` | `tranquillabs/tranquil-theme-icons` | `../tranquil-theme-icons` |
 | `tranquil-tips` | `tranquillabs/tranquil-tips` | `../tranquil-tips` |
 
+A fork of a third-party community package follows the same pattern, just with an npm name that
+doesn't match its repo/local-dir name (it keeps the upstream name on both):
+
+| npm name | Repo | Local dir |
+| --- | --- | --- |
+| `language-csv` | `tranquillabs/atom-language-csv` (fork of `ldez/atom-language-csv`) | `../atom-language-csv` |
+| `pdf-view` | `tranquillabs/atom-pdf-view` (fork of `izuzak/atom-pdf-view`) | `../atom-pdf-view` |
+
+`pdf-view` has its own runtime dependencies (`pdfjs-dist`, `atom-space-pen-views`, etc.), unlike
+`language-csv` — after cloning it, `cd ../atom-pdf-view && nvm use 20.16.0 && yarn install` before
+`yarn install` in `tranquil-client` (it has no `.nvmrc` of its own, so `nvm use` alone picks up
+whatever version was last active — pin it explicitly or you'll hit a corepack crash on a stale
+Node).
+
 Everything in `packages/` is forked Pulsar. Avoid modifying it.
 
 ## Third-Party Package Rule
@@ -60,6 +74,8 @@ Owned packages are linked via `link:../` in `package.json` so changes in sibling
 - `"tranquil-debug": "link:../tranquil-debug"`
 - `"tranquil-theme-icons": "link:../tranquil-theme-icons"`
 - `"tranquil-tips": "link:../tranquil-tips"`
+- `"language-csv": "link:../atom-language-csv"`
+- `"pdf-view": "link:../atom-pdf-view"`
 
 ## Dev Setup (First Time)
 
@@ -83,12 +99,21 @@ git clone https://github.com/tranquillabs/tranquil-config.git
 git clone https://github.com/tranquillabs/tranquil-debug.git
 git clone https://github.com/tranquillabs/tranquil-theme-icons.git
 git clone https://github.com/tranquillabs/tranquil-tips.git
+git clone https://github.com/tranquillabs/atom-language-csv.git
+git clone https://github.com/tranquillabs/atom-pdf-view.git
+cd atom-pdf-view && source ~/.nvm/nvm.sh && nvm use 20.16.0 && yarn install && cd ..
 cd tranquil-client
 source ~/.nvm/nvm.sh && nvm use
 yarn install
 git submodule update --init ppm
 cd ppm && yarn install && cd ..
 ```
+
+**`yarn install` at the root can silently break native modules.** `better-sqlite3` is rebuilt for
+Electron's Node ABI, not the system Node's — a plain `yarn install` can leave it compiled for the
+wrong ABI, which surfaces as a `NODE_MODULE_VERSION` mismatch crash (blank window, no obvious cause)
+on next launch. Fix: `yarn build` (runs `electron-rebuild`). Run it after any `yarn install` at the
+root if the app fails to launch afterward.
 
 Then symlink the owned packages into `~/.tranquil/dev/packages/` so they load as dev packages (not core) in local development:
 
@@ -100,6 +125,8 @@ ln -s /Users/david/Documents/Tranquil/Repos/tranquil-config ~/.tranquil/dev/pack
 ln -s /Users/david/Documents/Tranquil/Repos/tranquil-debug ~/.tranquil/dev/packages/tranquil-debug
 ln -s /Users/david/Documents/Tranquil/Repos/tranquil-theme-icons ~/.tranquil/dev/packages/tranquil-theme-icons
 ln -s /Users/david/Documents/Tranquil/Repos/tranquil-tips ~/.tranquil/dev/packages/tranquil-tips
+ln -s /Users/david/Documents/Tranquil/Repos/atom-language-csv ~/.tranquil/dev/packages/language-csv
+ln -s /Users/david/Documents/Tranquil/Repos/atom-pdf-view ~/.tranquil/dev/packages/pdf-view
 ```
 
 This is the idiomatic Pulsar approach: packages found in `dev/packages/` are discovered before `packageDependencies` and get `isBundled: false`, so they appear as dev packages rather than core. In production builds the symlinks won't exist and the packages load from `node_modules` as bundled.
