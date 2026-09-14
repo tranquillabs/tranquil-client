@@ -8,15 +8,11 @@
 Web apps open as tabs, links save as files, and pages can be scripted — one workspace for
 the web apps and files your work spans.
 
-[Website](https://tranquillabs.dev) · [Docs](https://tranquillabs.dev/docs/v0.1.0/overview/introduction) · [Releases](https://github.com/tranquillabs/tranquil-client/releases) · [Discussions](https://github.com/orgs/tranquillabs/discussions)
+[Website](https://tranquillabs.dev) · [Docs](https://tranquillabs.dev/docs/overview/introduction) · [Releases](https://github.com/tranquillabs/tranquil-client/releases) · [Discussions](https://github.com/orgs/tranquillabs/discussions)
 
 </div>
 
 ---
-
-> **Developer preview — not stable.** Tranquil is in early, active development. APIs, interfaces,
-> and behavior are provisional and will change before a stable release. Don't build anything you
-> depend on against it yet.
 
 ## What is Tranquil?
 
@@ -35,8 +31,8 @@ project, and drive live pages with plain-JavaScript automations.
   window) and a per-window accent color to tell windows apart.
 - **Project Pane** — semantic file-type icons, folder-count pills, hover rename/delete,
   ⌥/⌘ drag-to-copy, and undoable file operations.
-- **Automations** — write plain JavaScript and run it against a live browser tab with ⌘⇧R, or
-  register any `.js` file as a named command.
+- **Automations** — write TypeScript and run it against a live browser tab with ⌘⇧R, or
+  register any `.ts` file as a named command.
 - **Settings & themes** — a first-class settings tab with a live UI-theme picker, plus refreshed
   default light and dark themes.
 
@@ -44,7 +40,7 @@ project, and drive live pages with plain-JavaScript automations.
 
 Download the latest preview from the
 [releases page](https://github.com/tranquillabs/tranquil-client/releases), or build from source —
-the [Local Dev Setup runbook](https://tranquillabs.dev/docs/v0.1.0/development/local-dev-setup)
+the [Local Dev Setup runbook](https://tranquillabs.dev/docs/development/getting-started/local-dev-setup)
 clones the sibling packages, wires them together, and launches the app.
 
 ## The Tranquil toolkit
@@ -55,8 +51,8 @@ Tranquil Studio (this repo) is one of four pieces:
 | --- | --- |
 | **Studio** | The desktop editor and automation workspace (this repo). |
 | **Browser** | The embedded Chromium browser — your window onto any web app. |
-| **Engine** | A runtime to package and run automations headlessly (e.g. in CI/CD). |
-| **Automations** | The JavaScript SDK — sequences of steps across your apps, on a schedule or on demand. |
+| **Engine** | *Not yet available, in design.* A runtime to package and run automations headlessly (e.g. in CI/CD). |
+| **Automations** | Write TypeScript and run it against a live browser tab (⌘⇧R), or register any `.ts` file as a named command. |
 
 ## License
 
