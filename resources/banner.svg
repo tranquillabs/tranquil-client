@@ -17,9 +17,9 @@
     <rect x="1" y="90" width="185" height="22" fill="#78A4FF" fill-opacity="0.12"/>
     <rect x="1" y="90" width="2.5" height="22" fill="#78A4FF"/>
     <rect x="34" y="98" width="8" height="8" rx="1.5" fill="#78A4FF"/>
-    <text x="48" y="106" fill="#ece8df">app.js</text>
+    <text x="48" y="106" fill="#ece8df">app.ts</text>
     <rect x="34" y="121" width="8" height="8" rx="1.5" fill="#78A4FF"/>
-    <text x="48" y="129">browser.js</text>
+    <text x="48" y="129">browser.ts</text>
     <rect x="34" y="144" width="8" height="8" rx="1.5" fill="#64D1C8"/>
     <text x="48" y="152">styles.css</text>
     <text x="18" y="176">▸ resources</text>
@@ -35,7 +35,7 @@
   <rect x="192" y="40" width="140" height="24" rx="4" fill="#1a1d24"/>
   <rect x="192" y="61" width="140" height="3" fill="#78A4FF"/>
   <circle cx="206" cy="52" r="3.5" fill="#78A4FF"><animate attributeName="fill-opacity" values="0.5;1;0.5" dur="2.4s" repeatCount="indefinite"/></circle>
-  <text x="218" y="56" font-size="12" fill="#ece8df">app.js</text>
+  <text x="218" y="56" font-size="12" fill="#ece8df">app.ts</text>
   <circle cx="352" cy="52" r="3.5" fill="none" stroke="#7f838c" stroke-width="1.4"/>
   <text x="364" y="56" font-size="12" fill="#7f838c">example.com</text>
 
@@ -83,5 +83,5 @@
   <rect x="1" y="383" width="798" height="16" fill="#15181e"/>
   <rect x="1" y="383" width="104" height="16" fill="#78A4FF" fill-opacity="0.9"/>
   <text x="14" y="394" font-size="10" fill="#12141a">● main</text>
-  <text x="789" y="394" text-anchor="end" font-size="10" fill="#6c7178">JavaScript · UTF-8 · tranquil</text>
+  <text x="789" y="394" text-anchor="end" font-size="10" fill="#6c7178">TypeScript · UTF-8 · tranquil</text>
 </svg>
