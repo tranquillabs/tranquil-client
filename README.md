@@ -8,7 +8,7 @@
 Web apps open as tabs, links save as files, and pages can be scripted — one workspace for
 the web apps and files your work spans.
 
-[Website](https://tranquillabs.dev) · [Docs](https://tranquillabs.dev/docs/overview/introduction) · [Releases](https://github.com/tranquillabs/tranquil-client/releases) · [Discussions](https://github.com/orgs/tranquillabs/discussions)
+[Website](https://tranquillabs.dev) · [Docs](https://tranquillabs.dev/docs/overview/introduction) · [Releases](https://github.com/tranquillabs/tranquil-client/releases)
 
 </div>
 
@@ -18,7 +18,7 @@ the web apps and files your work spans.
 
 Tranquil Studio is an Electron desktop editor where a real Chromium browser is a first-class
 citizen next to your files: open web apps as editor tabs, save links as `.url` files in your
-project, and drive live pages with plain-JavaScript automations.
+project, and drive live pages with TypeScript automations.
 
 ## Highlights
 
@@ -45,13 +45,12 @@ clones the sibling packages, wires them together, and launches the app.
 
 ## The Tranquil toolkit
 
-Tranquil Studio (this repo) is one of four pieces:
+Tranquil Studio (this repo) is one of three pieces:
 
 | Piece | What it is |
 | --- | --- |
 | **Studio** | The desktop editor and automation workspace (this repo). |
 | **Browser** | The embedded Chromium browser — your window onto any web app. |
-| **Engine** | *Not yet available, in design.* A runtime to package and run automations headlessly (e.g. in CI/CD). |
 | **Automations** | Write TypeScript and run it against a live browser tab (⌘⇧R), or register any `.ts` file as a named command. |
 
 ## License
