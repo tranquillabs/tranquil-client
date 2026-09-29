@@ -1,26 +1,34 @@
 {
-  "release": "v0.2.1",
-  "date": "2026-09-07",
+  "release": "v0.2.2",
+  "date": "2026-09-29",
   "packages": {
+    "language-csv": {
+      "version": "1.1.2",
+      "sha": "805a7da16a6cc36a9f1bebcfedc7e4281de7792d"
+    },
+    "pdf-view": {
+      "version": "0.73.0",
+      "sha": "c1055346ec42614cde5dbe199591b31d5a432891"
+    },
     "tranquil-automations": {
-      "version": "0.2.1",
-      "sha": "3847aec5efb2d92d80dfce270f5d34dc7febefb5"
+      "version": "0.2.2",
+      "sha": "ee9896fd4607792bda7de62e5a5464c4245f6e94"
     },
     "tranquil-browser": {
-      "version": "0.1.2",
-      "sha": "53d2d8710cf69e2ae2b61150c7f9586fbcce338f"
+      "version": "0.1.3",
+      "sha": "a5f2c15995a574dd563a5c014a9f20f2cc14b438"
     },
     "tranquil-business-dark": {
       "version": "0.1.2",
-      "sha": "b058425998d44c052e89e03c3d99a6970723daa9"
+      "sha": "49723d295747f27e54fc108dfa1efc3bb27f31b2"
     },
     "tranquil-business-light": {
       "version": "0.1.2",
-      "sha": "a98abfcc597dde85c6be132cdbb832feb5b7e7e1"
+      "sha": "1c3fa47b2ed3d7a1b1f6318185091cf4e00ac724"
     },
     "tranquil-config": {
-      "version": "0.2.0",
-      "sha": "a10cfc72f42a73600b8f750a6b088f37a6259e46"
+      "version": "0.2.1",
+      "sha": "df68327f7cf3925bb0ff9cd06f924d5decf435ab"
     },
     "tranquil-debug": {
       "version": "0.1.1",
@@ -28,19 +36,19 @@
     },
     "tranquil-drag-drop": {
       "version": "0.1.1",
-      "sha": "415cd60492426e8418843983380926a767304ce5"
+      "sha": "c09dc3142b561a24ec283cb83e4797f56004c6b4"
     },
     "tranquil-rpc": {
       "version": "0.2.0",
-      "sha": "ad9ca6fd3f42a43e93a69b6ac3e02072b60982c9"
+      "sha": "d7bb164ff2e512dd5241492fb89f3da7d7375b56"
     },
     "tranquil-theme-icons": {
       "version": "0.1.0",
-      "sha": "42f03dc276c1bef972ceba8bf9d1e794ccca4f91"
+      "sha": "7d351aef8c0cd7a3a192a3cb9eadb53d814eb689"
     },
     "tranquil-tips": {
       "version": "0.1.2",
-      "sha": "2b234e0709632777b566a8470eaab3df1d53e78e"
+      "sha": "c15fe770eeecc1978f46bf80cc9dd21c4e91d577"
     },
     "tranquil-window-color": {
       "version": "0.1.0",

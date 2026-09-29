@@ -22,9 +22,11 @@ const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
 
 // The owned, bundled set = every dependency resolved from a sibling repo via
 // the `link:` protocol. Deriving it from package.json keeps the manifest in
-// lockstep with what actually ships.
+// lockstep with what actually ships. The `link:` specifier is the whole test —
+// not the package name, since forks we maintain keep their upstream names
+// (language-csv, pdf-view) and would otherwise drop out of the record.
 const owned = Object.entries(pkg.dependencies || {})
-  .filter(([name, spec]) => name.startsWith('tranquil-') && String(spec).startsWith('link:'))
+  .filter(([, spec]) => String(spec).startsWith('link:'))
   .map(([name, spec]) => ({ name, dir: path.resolve(root, String(spec).slice('link:'.length)) }))
   .sort((a, b) => a.name.localeCompare(b.name));
 
