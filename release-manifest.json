@@ -1,58 +1,62 @@
 {
-  "release": "v0.2.2",
-  "date": "2026-09-29",
+  "release": "v0.3.0",
+  "date": "2026-10-16",
   "packages": {
     "language-csv": {
       "version": "1.1.2",
-      "sha": "805a7da16a6cc36a9f1bebcfedc7e4281de7792d"
+      "sha": "0c1be8070be511ca24576fa829bbe346c1b38c4b"
     },
     "pdf-view": {
       "version": "0.73.0",
-      "sha": "c1055346ec42614cde5dbe199591b31d5a432891"
+      "sha": "825f0d403a47db4ffc204ffddddee3d62f7e841d"
     },
     "tranquil-automations": {
-      "version": "0.2.2",
-      "sha": "ee9896fd4607792bda7de62e5a5464c4245f6e94"
+      "version": "0.3.0",
+      "sha": "332fc30fd0a90a06fcf63b0f5a9cb7c4f5d4120c"
     },
     "tranquil-browser": {
-      "version": "0.1.3",
-      "sha": "a5f2c15995a574dd563a5c014a9f20f2cc14b438"
+      "version": "0.1.4",
+      "sha": "70f1284d63348645988ec6e5d31c2527d3dc19ce"
     },
     "tranquil-business-dark": {
       "version": "0.1.2",
-      "sha": "49723d295747f27e54fc108dfa1efc3bb27f31b2"
+      "sha": "8980b20df2303a3f41ed2b7448a61446fb8be5e8"
     },
     "tranquil-business-light": {
       "version": "0.1.2",
-      "sha": "1c3fa47b2ed3d7a1b1f6318185091cf4e00ac724"
+      "sha": "37ce2107f9d09e65fe88ff6cf0c868b7a0918c1d"
     },
     "tranquil-config": {
-      "version": "0.2.1",
-      "sha": "df68327f7cf3925bb0ff9cd06f924d5decf435ab"
+      "version": "0.2.2",
+      "sha": "1954180bf8a7e11bad6de2433628d5ad2fb6b4f4"
     },
     "tranquil-debug": {
       "version": "0.1.1",
-      "sha": "b0c251135f9b44dfce4077f6da13c0d4b5a2a22d"
+      "sha": "9414c4432de1daee2ca787cc026b18d820d1fe7f"
     },
     "tranquil-drag-drop": {
       "version": "0.1.1",
-      "sha": "c09dc3142b561a24ec283cb83e4797f56004c6b4"
+      "sha": "7e80bf8e6d0b355f079d8cee45714a9634f93d8b"
+    },
+    "tranquil-llm": {
+      "version": "0.1.0",
+      "sha": "6f31a79ecee55f3ea722a93dd326bd351ea221b8"
     },
     "tranquil-rpc": {
       "version": "0.2.0",
-      "sha": "d7bb164ff2e512dd5241492fb89f3da7d7375b56"
+      "sha": "0d6ed27956902e7a27174bf18f8708767cef0554"
     },
     "tranquil-theme-icons": {
       "version": "0.1.0",
-      "sha": "7d351aef8c0cd7a3a192a3cb9eadb53d814eb689"
+      "sha": "c3c4ba58271396e3d2357e10395f6f31ac644ef1"
     },
     "tranquil-tips": {
       "version": "0.1.2",
-      "sha": "c15fe770eeecc1978f46bf80cc9dd21c4e91d577"
+      "sha": "2ca3e78de326bc2719a495535f46e485ad8bf480"
     },
     "tranquil-window-color": {
-      "version": "0.1.0",
-      "sha": "b5321371d4f4771b790959199ae0459eec7cd0d7"
+      "version": "0.1.1",
+      "sha": "09abb8b3a66b7926b023d5762707e9662c61c003"
     }
   }
 }
