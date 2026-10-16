@@ -177,6 +177,12 @@ let options = {
     "!**/build/Release/{obj.target,obj,.deps}",
 
     // Test Exclusions
+    // Tranquil's own packages (linked from sibling repos) ship their code, never their tests or
+    // test data. Enforced: tranquil-test-suite `deno task lint:security` (no-shipped-tests) fails
+    // when any test file in an owned package would ship, so a new owned package that is not
+    // `tranquil-*` must be added to these lists.
+    "!node_modules/{tranquil-*,language-csv,pdf-view}/**/*_test.{ts,js}",
+    "!node_modules/{tranquil-*,language-csv,pdf-view}/**/{test,testdata,spec}/**",
     "!**/pegjs/examples",
     "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
     "!**/node_modules/babel-core/lib/transformation/transforers/spec", // Ignore babel-core spec

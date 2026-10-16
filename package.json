@@ -39,6 +39,7 @@
     "tranquil-window-color": "link:../tranquil-window-color",
     "language-csv": "link:../atom-language-csv",
     "pdf-view": "link:../atom-pdf-view",
+    "tranquil-llm": "link:../tranquil-llm",
     "@atom/source-map-support": "^0.3.4",
     "@babel/core": "7.18.6",
     "@electron/remote": "2.1.2",

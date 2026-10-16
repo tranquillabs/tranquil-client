@@ -19,6 +19,7 @@
 //                  default session (normal browsing) is never touched.
 
 const fs = require('fs');
+const { CHANNELS } = require('tranquil-browser/lib/ipc.js');
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -325,7 +326,7 @@ function registerHar({ session }, harPath) {
 // ---- Wiring --------------------------------------------------------------
 
 function registerHarIpc({ ipcMain, session, dialog, BrowserWindow, app }) {
-  ipcMain.handle('capture-har', async (_event, { url, partition }) =>
+  ipcMain.handle(CHANNELS.captureHar, async (_event, { url, partition }) =>
     // Overall guard: never let a capture hang silently — surface a timeout the
     // renderer turns into an error toast. captureHar cleans up its own window.
     Promise.race([
@@ -336,7 +337,7 @@ function registerHarIpc({ ipcMain, session, dialog, BrowserWindow, app }) {
     ])
   );
 
-  ipcMain.handle('show-save-har-dialog', async (event, { defaultPath }) => {
+  ipcMain.handle(CHANNELS.showSaveHarDialog, async (event, { defaultPath }) => {
     const win =
       BrowserWindow.fromWebContents(event.sender) ||
       BrowserWindow.getFocusedWindow();
@@ -347,7 +348,7 @@ function registerHarIpc({ ipcMain, session, dialog, BrowserWindow, app }) {
     });
   });
 
-  ipcMain.handle('register-har', async (_event, { harPath }) =>
+  ipcMain.handle(CHANNELS.registerHar, async (_event, { harPath }) =>
     registerHar({ session }, harPath)
   );
 }

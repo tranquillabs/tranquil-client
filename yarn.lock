@@ -10216,6 +10216,10 @@ tr46@~0.0.1, tr46@~0.0.3:
   version "0.0.0"
   uid ""
 
+"tranquil-llm@link:../tranquil-llm":
+  version "0.0.0"
+  uid ""
+
 "tranquil-rpc@link:../tranquil-rpc":
   version "0.0.0"
   uid ""

@@ -5,17 +5,27 @@ const {
   BrowserWindow,
   ipcMain,
   ipcRenderer,
-  globalShortcut,
   dialog,
   session,
   net,
   powerMonitor,
   webContents,
+  clipboard,
 } = require('electron');
 const path = require('path');
 const { registerHarIpc } = require('./har.js');
 const { manageBrowserColorScheme } = require('./tb-color-scheme.js');
 const { startStallWatchdog } = require('./stall-watchdog.js');
+const { applyPagePermissions } = require('./page-permissions.js');
+const { cleanUpWindowSessions } = require('./window-session-cleanup.js');
+const { publishUserGuides } = require('./user-guides.js');
+const { CHANNELS, RELAYED } = require('tranquil-browser/lib/ipc.js');
+
+// A closed window's browser session goes with it (window-session-cleanup.js).
+cleanUpWindowSessions(() => global.atomApplication);
+
+// The user guides for users' LLMs, copied to ~/.tranquil/llm/ (user-guides.js).
+publishUserGuides();
 
 // HAR capture (hidden-window DevTools Protocol recording) + offline replay
 // (per-archive session interception) for the Tranquil browser. See har.js.
@@ -50,7 +60,7 @@ let currentUserAgent = stripAppUaTokens(app.userAgentFallback).replace(
   /Chrome\/[\d.]+/,
   'Chrome/139.0.0.0'
 );
-ipcMain.on('set-user-agent', (event, ua) => {
+ipcMain.on(CHANNELS.setUserAgent, (event, ua) => {
   if (typeof ua === 'string' && ua.trim()) currentUserAgent = ua.trim();
 });
 
@@ -130,6 +140,8 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
   // <webview useragent> attribute / setUserAgent; electron #7203/#7205).
   if (webContents.getType() === 'webview') {
     const ses = webContents.session;
+    // Web pages get no permission that was not explicitly allowed (page-permissions.js).
+    applyPagePermissions(ses);
     if (!uaHeaderSessions.has(ses)) {
       uaHeaderSessions.add(ses);
       ses.webRequest.onBeforeSendHeaders((details, callback) => {
@@ -152,7 +164,7 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
         // clicked. The renderer handler dedups by id across its per-tab
         // listeners, so exactly one tab opens.
         BrowserWindow.getFocusedWindow()?.webContents?.send(
-          'open-link-in-new-tab',
+          CHANNELS.openLinkInNewTab,
           { link: url, id: Date.now() }
         );
       }
@@ -196,7 +208,7 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
           click: async function () {
             // {main} to renderer
             BrowserWindow.getFocusedWindow()?.webContents?.send(
-              'get-selected-content-link',
+              CHANNELS.getSelectedContentLink,
               {
                 action: 'copy-link-address',
               }
@@ -212,7 +224,7 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
             // {main} to renderer
             const id = Date.now();  // to prevent this event from being called multiple times at once.
             BrowserWindow.getFocusedWindow()?.webContents?.send(
-              'get-selected-content-link',
+              CHANNELS.getSelectedContentLink,
               {
                 action: 'open-in-new-tab',
                 id
@@ -228,7 +240,7 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
             // {main} to renderer
             const id = Date.now(); // to prevent this event from being called multiple times at once.
             BrowserWindow.getFocusedWindow()?.webContents?.send(
-              'get-selected-content-link',
+              CHANNELS.getSelectedContentLink,
               {
                 action: 'open-in-default-window',
                 id,
@@ -244,7 +256,7 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
             // {main} to renderer
             const id = Date.now(); // to prevent this event from being called multiple times at once.
             BrowserWindow.getFocusedWindow()?.webContents?.send(
-              'get-selected-content-link',
+              CHANNELS.getSelectedContentLink,
               {
                 action: 'open-in-new-window',
                 id,
@@ -259,7 +271,7 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
           click: async function () {
             // {main} to renderer
             BrowserWindow.getFocusedWindow()?.webContents?.send(
-              'get-selected-content-link',
+              CHANNELS.getSelectedContentLink,
               {
                 action: 'add-link-to-treeview',
               }
@@ -272,7 +284,7 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
           label: 'Save image to Treeview',
           click: async function () {
             BrowserWindow.getFocusedWindow()?.webContents?.send(
-              'get-selected-image-link',
+              CHANNELS.getSelectedImageLink,
               {
                 action: 'add-link-to-treeview',
               }
@@ -321,6 +333,54 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
   );
 });
 
+// Requests from the page preload (bp-client.js), which runs sandboxed without Node.js.
+// Suggestions are for our own start page only, and come from DuckDuckGo only.
+function fromOwnPage(event, name) {
+  try {
+    const u = new URL(event.senderFrame.url);
+    return u.protocol === 'file:' && u.pathname.endsWith('/tranquil-browser/resources/' + name);
+  } catch {
+    return false;
+  }
+}
+
+ipcMain.handle(CHANNELS.suggest, async (event, term) => {
+  if (!fromOwnPage(event, 'home.html')) return [];
+  if (typeof term !== 'string' || !term.trim() || term.length > 200) return [];
+  try {
+    const res = await net.fetch(
+      'https://ac.duckduckgo.com/ac/?type=list&q=' + encodeURIComponent(term),
+      {
+        headers: { 'User-Agent': currentUserAgent, Accept: 'application/json' },
+        signal: AbortSignal.timeout(4000),
+      }
+    );
+    const data = await res.json();
+    return Array.isArray(data && data[1])
+      ? data[1].filter((s) => typeof s === 'string').slice(0, 10)
+      : [];
+  } catch {
+    return [];
+  }
+});
+
+// "Copy link address" from a page's context menu: an http(s) address, nothing else.
+ipcMain.on(CHANNELS.copyLink, (event, address) => {
+  if (event.sender.getType() !== 'webview') return;
+  if (typeof address !== 'string' || address.length > 8192 || !/^https?:\/\//i.test(address)) return;
+  clipboard.writeText(address);
+});
+
+// Messages from a page's preload that belong to the window showing it, passed on unchanged.
+// Key events also say which page sent them, so the window can find its tab (ADR-0018).
+for (const channel of RELAYED) {
+  ipcMain.on(channel, (event, arg) => {
+    const payload =
+      channel === CHANNELS.webviewKeyEvents ? { ...arg, webContentsId: event.sender.id } : arg;
+    BrowserWindow.getFocusedWindow()?.webContents?.send(channel, payload);
+  });
+}
+
 // Fallback for a browser tab whose guest won't close gracefully — a page
 // stuck in heavy/blocking synchronous JS (not `beforeunload`; that's handled
 // above via `will-prevent-unload`) can leave its renderer unresponsive to the
@@ -329,35 +389,14 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
 // tranquil-browser-view.js); if the webContents still exists by then, kill
 // its process outright so the tab actually closes. Harmless no-op if it
 // already tore down cleanly in the meantime.
-ipcMain.on('force-close-webview', (event, webContentsId) => {
+ipcMain.on(CHANNELS.forceCloseWebview, (event, webContentsId) => {
   const guest = webContents.fromId(webContentsId);
   if (guest && !guest.isDestroyed()) {
     guest.forcefullyCrashRenderer();
   }
 });
 
-ipcMain.on('open-link-in-new-tab', (event, arg) => {
-  BrowserWindow.getFocusedWindow()?.webContents?.send(
-    'open-link-in-new-tab',
-    arg
-  );
-});
-
-ipcMain.on('open-link-in-default-window', (event, arg) => {
-  BrowserWindow.getFocusedWindow()?.webContents?.send(
-    'open-link-in-default-window',
-    arg
-  );
-});
-
-ipcMain.on('open-link-in-new-window', (event, arg) => {
-  BrowserWindow.getFocusedWindow()?.webContents?.send(
-    'open-link-in-new-window',
-    arg
-  );
-});
-
-ipcMain.handle('show-save-url-dialog', async (event, { defaultPath }) => {
+ipcMain.handle(CHANNELS.showSaveUrlDialog, async (event, { defaultPath }) => {
   const win = BrowserWindow.fromWebContents(event.sender) || BrowserWindow.getFocusedWindow();
   return dialog.showSaveDialog(win, {
     defaultPath,
@@ -366,95 +405,3 @@ ipcMain.handle('show-save-url-dialog', async (event, { defaultPath }) => {
   });
 });
 
-ipcMain.on('add-link-to-treeview', (event, arg) => {
-  BrowserWindow.getFocusedWindow()?.webContents?.send(
-    'add-link-to-treeview',
-    arg
-  );
-});
-
-ipcMain.on('webview-key-events', (event, arg) => {
-  BrowserWindow.getFocusedWindow()?.webContents?.send(
-    'webview-key-events',
-    { ...arg, webContentsId: event.sender.id }
-  );
-});
-
-// Zoom is driven by process-global accelerators, so they must be (re)registered
-// for whichever browser window currently holds focus. The renderer's `zoom`
-// handler zooms the *active* tab's webview (see tranquil-browser utils.js), so
-// the accelerators just send a plain zoom command — no per-tab webViewId needed.
-const addGlobalShortcuts = () => {
-  const sendZoom = (type) =>
-    BrowserWindow.getFocusedWindow()?.webContents?.send('zoom', { type });
-  globalShortcut.register('CommandOrControl+numsub', () => sendZoom('out'));
-  globalShortcut.register('CommandOrControl+numadd', () => sendZoom('in'));
-  globalShortcut.register('CommandOrControl+-', () => sendZoom('out'));
-  globalShortcut.register('CommandOrControl+=', () => sendZoom('in'));
-};
-const removeGlobalShortcuts = () => {
-  globalShortcut.unregister('CommandOrControl+numsub');
-  globalShortcut.unregister('CommandOrControl+numadd');
-  globalShortcut.unregister('CommandOrControl+-');
-  globalShortcut.unregister('CommandOrControl+=');
-};
-
-// `add-instance-events` fires once per browser TAB, but the focus/blur wiring
-// that (re)registers the zoom accelerators is a per-WINDOW concern. Wire each
-// window exactly once — the old code stacked a fresh focus+blur listener on the
-// same BrowserWindow for every tab, leaking them (MaxListenersExceededWarning
-// after ~10 tabs). The WeakSet entry drops when the window is destroyed.
-const zoomWiredWindows = new WeakSet();
-ipcMain.on('add-instance-events', (event) => {
-  const win =
-    BrowserWindow.fromWebContents(event.sender) ||
-    BrowserWindow.getFocusedWindow();
-  if (!win || zoomWiredWindows.has(win)) return;
-  zoomWiredWindows.add(win);
-
-  if (win.isFocused()) addGlobalShortcuts();
-  win.on('focus', () => {
-    removeGlobalShortcuts();
-    addGlobalShortcuts();
-  });
-  win.on('blur', removeGlobalShortcuts);
-});
-
-ipcMain.on('hide-login-screen', (event, payload) => {
-  BrowserWindow.getAllWindows().forEach(win => {
-    win?.webContents?.send('hide-login-screen', payload);
-  });
-});
-
-ipcMain.on('logout-session', (event, arg) => {
-  console.log('ipcMain-logout-session');
-  const win = BrowserWindow.getFocusedWindow();
-  const ses = win.webContents.session;
-  ses.clearCache();
-  ses
-    .clearStorageData({ storages: ['cookies'] })
-    .then(() => {
-      console.log('All cookies cleared');
-      BrowserWindow.getAllWindows().forEach((windows) => {
-        windows?.webContents?.send('show-login-screen', arg);
-      });
-    })
-    .catch((error) => {
-      console.error('Failed to clear cookies: ', error);
-    });
-});
-
-
-ipcMain.on('tab-focus', async (event, arg) => {
-  BrowserWindow.getFocusedWindow()?.webContents?.send(
-    'tab-focus',
-    arg
-  );
-});
-
-ipcMain.handle('electron-signed-in-email', async (event, obj) => {
-  BrowserWindow.getFocusedWindow()?.webContents?.send(
-    'electron-send-email-to-webview',
-    {}
-  );
-});
