@@ -129,6 +129,11 @@ ipcMain.handle('clear-site-cookies', async (event, { partition, url }) => {
 // per-window partitions aren't re-bound). The closure reads the live currentUserAgent.
 const uaHeaderSessions = new WeakSet();
 
+// Input that lets a page open a tab for the next few seconds, as Chrome's user activation does:
+// clicks, key presses and taps, but not mouse movement or scrolling.
+const ACTIVATING_INPUT = new Set(['mouseDown', 'mouseUp', 'rawKeyDown', 'keyDown', 'touchEnd', 'gestureTap']);
+const ACTIVATION_MS = 5000;
+
 app.on('web-contents-created', (...[, /* event */ webContents]) => {
   // Isolate browser <webview> guests from the editor-driven nativeTheme so
   // websites follow the OS appearance, not the dark editor theme. See
@@ -157,18 +162,53 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
     // open-link-in-new-tab flow as cmd-click, so it lands in the source tab's
     // stack). Plain same-window links (target=_self / none) are unaffected and
     // navigate in the current tab as usual.
+    //
+    // Electron has no popup blocker, so only a window.open() within ACTIVATION_MS of the person
+    // clicking or typing in this page opens a tab. Pop-unders on a timer and scripts that call
+    // window.open() on load, as every tab does again on session restore, open nothing.
+    // 'input-event' reports real input only; a page can't fake it.
+    //
+    // A sized popup (disposition 'new-window', as "Sign in with Google" buttons open) becomes a
+    // tab too, by choice: it has no window.opener there, so a sign-in that reports back through
+    // it can't finish, and the person signs in another way.
+    let lastInputAt = 0;
+    webContents.on('input-event', (_event, input) => {
+      if (ACTIVATING_INPUT.has(input.type)) lastInputAt = Date.now();
+    });
+    const openAsTab = (url) => {
+      if (!url || !/^https?:\/\//i.test(url)) return;
+      // Same delivery the cmd-click flow uses (ipcMain 'open-link-in-new-tab'
+      // below): send to the focused window — the one whose guest was just
+      // clicked. The renderer handler dedups by id across its per-tab
+      // listeners, so exactly one tab opens.
+      BrowserWindow.getFocusedWindow()?.webContents?.send(
+        CHANNELS.openLinkInNewTab,
+        { link: url, id: Date.now() }
+      );
+    };
     webContents.setWindowOpenHandler(({ url }) => {
-      if (url && /^https?:\/\//i.test(url)) {
-        // Same delivery the cmd-click flow uses (ipcMain 'open-link-in-new-tab'
-        // below): send to the focused window — the one whose guest was just
-        // clicked. The renderer handler dedups by id across its per-tab
-        // listeners, so exactly one tab opens.
-        BrowserWindow.getFocusedWindow()?.webContents?.send(
-          CHANNELS.openLinkInNewTab,
-          { link: url, id: Date.now() }
-        );
+      if (Date.now() - lastInputAt >= ACTIVATION_MS) return { action: 'deny' };
+      // Some pages open a blank window and then send it to the address, often one they look up
+      // first (hiringcafe's "Apply directly on employer's site"). Denying hands the page null
+      // and the click does nothing, so a hidden window stands in until it navigates.
+      if (!url || url === 'about:blank') {
+        return { action: 'allow', overrideBrowserWindowOptions: { show: false, focusable: false } };
       }
+      openAsTab(url);
       return { action: 'deny' };
+    });
+    // The hidden window above never shows: its first navigation opens as a tab instead and it
+    // closes then, or after ACTIVATION_MS if the page never sends it anywhere.
+    webContents.on('did-create-window', (win) => {
+      const close = () => {
+        if (!win.isDestroyed()) win.destroy();
+      };
+      win.webContents.once('will-navigate', (event) => {
+        event.preventDefault();
+        openAsTab(event.url);
+        close();
+      });
+      setTimeout(close, ACTIVATION_MS);
     });
 
     // A page's own `beforeunload` handler can cancel its unload — and unlike a
