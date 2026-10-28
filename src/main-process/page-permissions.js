@@ -7,6 +7,10 @@
 const ALLOWED = new Set([
   'fullscreen', // the page's own fullscreen button, after a click
   'clipboard-sanitized-write', // copy buttons: writing only, after a click
+  // A third-party frame asking for its own cookies, which Chrome grants without a prompt.
+  // reCAPTCHA needs it: refused, it issues no token, and Greenhouse and Ashby forms fail with 428.
+  'storage-access',
+  'top-level-storage-access',
 ]);
 
 const handled = new WeakSet();
