@@ -183,6 +183,9 @@ let options = {
     // `tranquil-*` must be added to these lists.
     "!node_modules/{tranquil-*,language-csv,pdf-view}/**/*_test.{ts,js}",
     "!node_modules/{tranquil-*,language-csv,pdf-view}/**/{test,testdata,spec}/**",
+    // A package's UI sources and their build tools (ui/, with its own node_modules) stay out too;
+    // only the built output in dist/ ships.
+    "!node_modules/tranquil-*/ui/**",
     "!**/pegjs/examples",
     "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
     "!**/node_modules/babel-core/lib/transformation/transforers/spec", // Ignore babel-core spec
