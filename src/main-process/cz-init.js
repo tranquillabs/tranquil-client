@@ -20,6 +20,7 @@ const { applyPagePermissions } = require('./page-permissions.js');
 const { cleanUpWindowSessions } = require('./window-session-cleanup.js');
 const { publishUserGuides } = require('./user-guides.js');
 const { CHANNELS, RELAYED } = require('tranquil-browser/lib/ipc.js');
+const { enforcePagePreferences, isOwnPage, isWebURL } = require('tranquil-browser/lib/pages.js');
 
 // A closed window's browser session goes with it (window-session-cleanup.js).
 cleanUpWindowSessions(() => global.atomApplication);
@@ -110,7 +111,9 @@ ipcMain.handle('fetch-browser-versions', async () => {
 // pane-control button in tranquil-automations). Scoped to the tab's session
 // partition and to cookies that would be sent to `url` — including parent-domain
 // cookies (.example.com) — so the rest of the window session's logins survive.
-ipcMain.handle('clear-site-cookies', async (event, { partition, url }) => {
+ipcMain.handle(CHANNELS.clearSiteCookies, async (event, { partition, url }) => {
+  // Only the app's own window asks (a page's preload has no such channel), and only for a site.
+  if (event.sender.getType() !== 'window' || !isWebURL(url)) return 0;
   const ses = partition
     ? session.fromPartition(partition)
     : session.defaultSession;
@@ -135,6 +138,19 @@ const ACTIVATING_INPUT = new Set(['mouseDown', 'mouseUp', 'rawKeyDown', 'keyDown
 const ACTIVATION_MS = 5000;
 
 app.on('web-contents-created', (...[, /* event */ webContents]) => {
+  // Every <webview>, whatever code creates it, runs with the browser's page settings and no
+  // preload but the browser's own (tranquil-browser lib/pages.js). Pulsar's window has Node.js and
+  // no context isolation, so any code in it, an installed package included, could otherwise create
+  // a page with Node.js: Electron's security checklist, "Verify WebView options before creation".
+  webContents.on('will-attach-webview', (_event, webPreferences) => {
+    const weakened = enforcePagePreferences(webPreferences);
+    if (weakened.length) {
+      console.warn(
+        `[tranquil] A <webview> asked for ${weakened.join(', ')}; it runs with the browser's page settings instead.`
+      );
+    }
+  });
+
   // Isolate browser <webview> guests from the editor-driven nativeTheme so
   // websites follow the OS appearance, not the dark editor theme. See
   // tb-color-scheme.js.
@@ -176,7 +192,7 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
       if (ACTIVATING_INPUT.has(input.type)) lastInputAt = Date.now();
     });
     const openAsTab = (url) => {
-      if (!url || !/^https?:\/\//i.test(url)) return;
+      if (!isWebURL(url)) return;
       // Same delivery the cmd-click flow uses (ipcMain 'open-link-in-new-tab'
       // below): send to the focused window — the one whose guest was just
       // clicked. The renderer handler dedups by id across its per-tab
@@ -376,12 +392,7 @@ app.on('web-contents-created', (...[, /* event */ webContents]) => {
 // Requests from the page preload (bp-client.js), which runs sandboxed without Node.js.
 // Suggestions are for our own start page only, and come from DuckDuckGo only.
 function fromOwnPage(event, name) {
-  try {
-    const u = new URL(event.senderFrame.url);
-    return u.protocol === 'file:' && u.pathname.endsWith('/tranquil-browser/resources/' + name);
-  } catch {
-    return false;
-  }
+  return isOwnPage(event.senderFrame?.url, name);
 }
 
 ipcMain.handle(CHANNELS.suggest, async (event, term) => {
@@ -407,7 +418,7 @@ ipcMain.handle(CHANNELS.suggest, async (event, term) => {
 // "Copy link address" from a page's context menu: an http(s) address, nothing else.
 ipcMain.on(CHANNELS.copyLink, (event, address) => {
   if (event.sender.getType() !== 'webview') return;
-  if (typeof address !== 'string' || address.length > 8192 || !/^https?:\/\//i.test(address)) return;
+  if (typeof address !== 'string' || address.length > 8192 || !isWebURL(address)) return;
   clipboard.writeText(address);
 });
 

@@ -11,10 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 const { app, session } = require('electron');
-
-const PREFIX = 'tb-window-';
-
-const partitionFor = (id) => `persist:${PREFIX}${id}`;
+const { SESSION_PREFIX: PREFIX, windowPartition: partitionFor } = require('tranquil-browser/lib/pages.js');
 
 // The window session ids saved for restore, or null when they cannot be known.
 function savedSessionIds() {

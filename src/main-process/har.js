@@ -20,6 +20,7 @@
 
 const fs = require('fs');
 const { CHANNELS } = require('tranquil-browser/lib/ipc.js');
+const { PAGE_PREFERENCES } = require('tranquil-browser/lib/pages.js');
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -55,11 +56,10 @@ async function captureHar({ BrowserWindow, app }, { url, partition }) {
     show: false,
     width: 1280,
     height: 900,
+    // The page it captures runs with the browser's page settings (tranquil-browser lib/pages.js).
     webPreferences: {
       ...(partition ? { partition } : {}),
-      sandbox: true,
-      contextIsolation: true,
-      nodeIntegration: false,
+      ...PAGE_PREFERENCES,
     },
   });
   const wc = win.webContents;
