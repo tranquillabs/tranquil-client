@@ -16,9 +16,9 @@ const { SESSION_PREFIX: PREFIX, windowPartition: partitionFor } = require('tranq
 // The window session ids saved for restore, or null when they cannot be known.
 function savedSessionIds() {
   try {
-    const home = process.env.ATOM_HOME || path.join(app.getPath('home'), '.tranquil');
+    // ATOM_HOME is Tranquil's config folder, which start.js sets before anything else runs.
     const state = JSON.parse(
-      fs.readFileSync(path.join(home, 'storage', 'application.json'), 'utf8')
+      fs.readFileSync(path.join(process.env.ATOM_HOME, 'storage', 'application.json'), 'utf8')
     );
     if (!state || state.version !== '1' || !Array.isArray(state.windows)) return null;
     return new Set(state.windows.map((w) => w && w.windowSessionId).filter(Boolean));
