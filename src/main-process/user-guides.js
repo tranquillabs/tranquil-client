@@ -9,18 +9,14 @@
 // the app is removed. Any other file in the folder is left alone.
 const fs = require('fs');
 const path = require('path');
-const { app } = require('electron');
 
 /** @param {string} text */
 const firstLine = (text) => text.split('\n', 1)[0];
 
-function tranquilHome() {
-  return process.env.ATOM_HOME || path.join(app.getPath('home'), '.tranquil');
-}
-
 function publishUserGuides() {
-  const target = path.join(tranquilHome(), 'llm');
   try {
+    // ATOM_HOME is Tranquil's config folder, which start.js sets before anything else runs.
+    const target = path.join(process.env.ATOM_HOME, 'llm');
     const source = path.join(path.dirname(require.resolve('tranquil-llm/package.json')), 'users');
     const userGuides = new Map(
       fs.readdirSync(source)
